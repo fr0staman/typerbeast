@@ -1,3 +1,5 @@
+mod auth;
+mod config;
 mod router;
 mod routes;
 mod state;
