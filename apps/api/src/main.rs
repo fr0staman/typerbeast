@@ -8,6 +8,7 @@ use state::AppState;
 
 #[tokio::main]
 async fn main() {
+    dotenvy::dotenv().ok();
     pretty_env_logger::init_timed();
 
     let ip = [0, 0, 0, 0];
