@@ -1,0 +1,26 @@
+{
+  "$schema": "https://json.schemastore.org/tsconfig",
+  "compilerOptions": {
+    "baseUrl": ".",
+    "rootDir": ".",
+    "target": "ESNext",
+    "module": "ESNext",
+    "lib": ["ESNext"],
+    "strict": true,
+    "noEmit": true,
+    "esModuleInterop": true,
+    "moduleResolution": "bundler",
+    "resolveJsonModule": true,
+    "isolatedModules": true,
+    "allowSyntheticDefaultImports": true,
+    "allowJs": true,
+    "incremental": true,
+    "paths": {
+      "@/*": ["./src/*"],
+      "@/config/*": ["packages/config/*"],
+      "@/types/*": ["packages/types/*"],
+      "@/ui/*": ["packages/ui/*"],
+    }
+  },
+  "exclude": ["node_modules"]
+}
