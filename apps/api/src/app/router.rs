@@ -1,6 +1,6 @@
 use axum::{Json, Router, routing::*};
 
-use crate::{routes, state::AppState};
+use crate::{app::state::AppState, routes};
 
 pub fn build_router(state: AppState) -> Router<()> {
     Router::new()

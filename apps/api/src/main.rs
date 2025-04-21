@@ -1,13 +1,10 @@
-mod auth;
-mod config;
-mod router;
+mod app;
 mod routes;
-mod state;
 mod utils;
 
 use std::net::SocketAddr;
 
-use state::AppState;
+use app::state::AppState;
 
 #[tokio::main]
 async fn main() {
@@ -21,7 +18,7 @@ async fn main() {
 
     let state = AppState {};
 
-    let router = router::build_router(state.clone());
+    let router = app::router::build_router(state.clone());
     let service = router.into_make_service_with_connect_info::<SocketAddr>();
 
     let listener = tokio::net::TcpListener::bind(addr).await.unwrap();

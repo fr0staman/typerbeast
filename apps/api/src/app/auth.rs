@@ -18,7 +18,7 @@ use uuid::Uuid;
 pub const COMPANY_NAME: &str = env!("CARGO_PKG_NAME");
 
 pub static KEYS: LazyLock<Keys> = LazyLock::new(|| {
-    let secret = crate::config::load_config().jwt_secret;
+    let secret = crate::app::config::load_config().jwt_secret;
     Keys::new(secret.as_bytes())
 });
 

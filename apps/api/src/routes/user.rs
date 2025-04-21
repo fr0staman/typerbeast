@@ -11,7 +11,7 @@ use uuid::Uuid;
 
 use crate::{
     AppState,
-    auth::{AuthError, COMPANY_NAME, Claims, KEYS},
+    app::auth::{AuthError, COMPANY_NAME, Claims, KEYS},
     utils,
 };
 
