@@ -5,6 +5,7 @@ use axum::{
     extract::{ConnectInfo, State},
 };
 use axum_extra::{TypedHeader, headers::UserAgent};
+use chrono::NaiveDateTime;
 use jsonwebtoken::{Header, encode};
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;
@@ -52,14 +53,14 @@ pub async fn login(
         return Err(AuthError::WrongCredentials);
     }
 
-    let now = chrono::Utc::now().naive_utc();
-    let expire = now + chrono::Duration::days(1);
+    let created_at = chrono::Utc::now().naive_utc();
+    let expires_at = created_at + chrono::Duration::days(1);
     let session_id = Uuid::new_v4();
 
     let claims = Claims {
         sub: user.id,
         company: COMPANY_NAME.to_string(),
-        exp: expire.and_utc().timestamp() as usize,
+        exp: expires_at.and_utc().timestamp() as usize,
         sid: session_id,
     };
 
@@ -70,8 +71,8 @@ pub async fn login(
         id: session_id,
         user_id: user.id,
         token: access_token.clone(),
-        expires_at: expire,
-        created_at: now,
+        expires_at,
+        created_at,
         user_agent: user_agent.to_string(),
         ip: addr.ip().into(),
     };
@@ -85,12 +86,18 @@ pub async fn login(
 
 #[derive(Serialize, Deserialize)]
 pub struct ProfileResponse {
+    username: String,
     email: String,
+    created_at: NaiveDateTime,
 }
 
 pub async fn profile(claims: Claims, state: State<AppState>) -> Json<ProfileResponse> {
-    // In claims.sub I don't want to store the email, this is just for fast prototyping
-    let res = ProfileResponse { email: claims.sub.to_string() };
+    let mut conn = state.db().await.unwrap();
+
+    let user = User::get_user(&mut conn, claims.sub).await.unwrap().unwrap();
+
+    let res =
+        ProfileResponse { username: user.username, email: user.email, created_at: user.created_at };
 
     Json(res)
 }
