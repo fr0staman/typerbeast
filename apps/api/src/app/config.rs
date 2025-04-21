@@ -3,6 +3,7 @@ use serde::Deserialize;
 #[derive(Debug, Clone, Deserialize)]
 pub struct AppEnvConfig {
     pub jwt_secret: String,
+    pub database_url: String,
 }
 
 use config::Config;

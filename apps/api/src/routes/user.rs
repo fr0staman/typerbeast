@@ -12,6 +12,7 @@ use uuid::Uuid;
 use crate::{
     AppState,
     app::auth::{AuthError, COMPANY_NAME, Claims, KEYS},
+    db::models::{session::Session, user::User},
     utils,
 };
 
@@ -37,14 +38,15 @@ pub async fn login(
         return Err(AuthError::MissingCredentials);
     }
 
-    // TODO: add creds verify
-    if payload.email != "test@test.com" || payload.password != "foobarbaz" {
-        return Err(AuthError::WrongCredentials);
-    }
+    let mut conn = state.db().await.unwrap();
 
-    // Simulate password_hash from db
-    let password_hash = utils::hash_password(&payload.password).unwrap();
-    let is_verified = utils::verify_password(payload.password, password_hash).is_ok();
+    let maybe_user = User::get_user_by_email(&mut conn, &payload.email).await?;
+
+    let Some(user) = maybe_user else {
+        return Err(AuthError::WrongCredentials);
+    };
+
+    let is_verified = utils::verify_password(payload.password, user.password_hash).is_ok();
 
     if !is_verified {
         return Err(AuthError::WrongCredentials);
@@ -52,13 +54,10 @@ pub async fn login(
 
     let now = chrono::Utc::now().naive_utc();
     let expire = now + chrono::Duration::days(1);
-
-    // TODO: get from db
-    let user_id = Uuid::new_v4();
     let session_id = Uuid::new_v4();
 
     let claims = Claims {
-        sub: user_id,
+        sub: user.id,
         company: COMPANY_NAME.to_string(),
         exp: expire.and_utc().timestamp() as usize,
         sid: session_id,
@@ -66,6 +65,18 @@ pub async fn login(
 
     let access_token = encode(&Header::default(), &claims, &KEYS.encoding)
         .map_err(|_| AuthError::TokenCreation)?;
+
+    let new_session = Session {
+        id: session_id,
+        user_id: user.id,
+        token: access_token.clone(),
+        expires_at: expire,
+        created_at: now,
+        user_agent: user_agent.to_string(),
+        ip: addr.ip().into(),
+    };
+
+    new_session.insert_session(&mut conn).await?;
 
     let res = LoginResponse { access_token, token_type: "Bearer".to_string() };
 

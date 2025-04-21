@@ -1,4 +1,5 @@
 mod app;
+mod db;
 mod routes;
 mod utils;
 
@@ -11,12 +12,16 @@ async fn main() {
     dotenvy::dotenv().ok();
     pretty_env_logger::init_timed();
 
+    let config = app::config::load_config();
+
+    let pool = db::init::init_pool(config.database_url.clone());
+
+    let state = AppState { pool };
+
     let ip = [0, 0, 0, 0];
     let port = 9999;
 
     let addr = SocketAddr::from((ip, port));
-
-    let state = AppState {};
 
     let router = app::router::build_router(state.clone());
     let service = router.into_make_service_with_connect_info::<SocketAddr>();
