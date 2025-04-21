@@ -12,6 +12,7 @@ use uuid::Uuid;
 use crate::{
     AppState,
     auth::{AuthError, COMPANY_NAME, Claims, KEYS},
+    utils,
 };
 
 #[derive(Debug, Deserialize)]
@@ -38,6 +39,14 @@ pub async fn login(
 
     // TODO: add creds verify
     if payload.email != "test@test.com" || payload.password != "foobarbaz" {
+        return Err(AuthError::WrongCredentials);
+    }
+
+    // Simulate password_hash from db
+    let password_hash = utils::hash_password(&payload.password).unwrap();
+    let is_verified = utils::verify_password(payload.password, password_hash).is_ok();
+
+    if !is_verified {
         return Err(AuthError::WrongCredentials);
     }
 

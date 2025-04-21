@@ -3,6 +3,7 @@ mod config;
 mod router;
 mod routes;
 mod state;
+mod utils;
 
 use std::net::SocketAddr;
 
