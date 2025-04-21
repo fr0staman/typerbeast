@@ -114,6 +114,54 @@ pub async fn signup(
     TypedHeader(user_agent): TypedHeader<UserAgent>,
     ConnectInfo(addr): ConnectInfo<SocketAddr>,
     Json(input): Json<SignupRequest>,
-) -> Json<LoginResponse> {
-    todo!()
+) -> Result<Json<LoginResponse>, AuthError> {
+    let mut conn = state.db().await.unwrap();
+
+    let maybe_user = User::get_user_by_email(&mut conn, &input.email).await?;
+
+    if maybe_user.is_some() {
+        return Err(AuthError::WrongCredentials);
+    }
+
+    let password_hash = utils::hash_password(&input.password).unwrap();
+
+    let new_user = User {
+        id: Uuid::new_v4(),
+        username: input.username.clone(),
+        email: input.email.clone(),
+        password_hash,
+        created_at: chrono::Utc::now().naive_utc(),
+    };
+
+    let user = new_user.insert_user(&mut conn).await?;
+
+    let created_at = chrono::Utc::now().naive_utc();
+    let expires_at = created_at + chrono::Duration::days(1);
+    let session_id = Uuid::new_v4();
+
+    let claims = Claims {
+        sub: user.id,
+        company: COMPANY_NAME.to_string(),
+        exp: expires_at.and_utc().timestamp() as usize,
+        sid: session_id,
+    };
+
+    let access_token = encode(&Header::default(), &claims, &KEYS.encoding)
+        .map_err(|_| AuthError::TokenCreation)?;
+
+    let new_session = Session {
+        id: session_id,
+        user_id: user.id,
+        token: access_token.clone(),
+        expires_at,
+        created_at,
+        user_agent: user_agent.to_string(),
+        ip: addr.ip().into(),
+    };
+
+    new_session.insert_session(&mut conn).await?;
+
+    let res = LoginResponse { access_token, token_type: "Bearer".to_string() };
+
+    Ok(Json(res))
 }
