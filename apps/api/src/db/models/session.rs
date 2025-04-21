@@ -5,7 +5,7 @@ use ipnetwork::IpNetwork;
 use uuid::Uuid;
 
 use crate::{
-    app::{auth::AuthError, types::DbConn},
+    app::types::{DbConn, MyResult},
     db::schema::sessions,
 };
 #[derive(Queryable, Selectable, Insertable, Debug)]
@@ -21,7 +21,7 @@ pub struct Session {
 }
 
 impl Session {
-    pub async fn get_session(conn: &mut DbConn, sid: Uuid) -> Result<Option<Session>, AuthError> {
+    pub async fn get_session(conn: &mut DbConn, sid: Uuid) -> MyResult<Option<Session>> {
         use crate::db::schema::sessions::dsl::*;
 
         let result = sessions
@@ -29,21 +29,14 @@ impl Session {
             .select(Session::as_select())
             .first(conn)
             .await
-            .optional()
-            .unwrap();
-
-        dbg!(&result);
+            .optional()?;
 
         Ok(result)
     }
 
-    pub async fn insert_session(self, conn: &mut DbConn) -> Result<Session, AuthError> {
+    pub async fn insert_session(self, conn: &mut DbConn) -> MyResult<Session> {
         use crate::db::schema::sessions::dsl::*;
 
-        diesel::insert_into(sessions)
-            .values(self)
-            .get_result::<Session>(conn)
-            .await
-            .map_err(|_| AuthError::WrongCredentials)
+        Ok(diesel::insert_into(sessions).values(self).get_result::<Session>(conn).await?)
     }
 }

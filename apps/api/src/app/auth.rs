@@ -1,10 +1,9 @@
 use std::sync::LazyLock;
 
 use axum::{
-    Json, RequestPartsExt,
+    RequestPartsExt,
     extract::{FromRef, FromRequestParts},
-    http::{StatusCode, request::Parts},
-    response::{IntoResponse, Response},
+    http::request::Parts,
 };
 use axum_extra::{
     TypedHeader,
@@ -12,12 +11,14 @@ use axum_extra::{
 };
 use jsonwebtoken::{DecodingKey, EncodingKey, Validation, decode};
 use serde::{Deserialize, Serialize};
-use serde_json::json;
 use uuid::Uuid;
 
 use crate::db::models::session::Session;
 
-use super::state::AppState;
+use super::{
+    error::{AuthError, MyError},
+    state::AppState,
+};
 
 pub const COMPANY_NAME: &str = env!("CARGO_PKG_NAME");
 
@@ -53,7 +54,7 @@ where
     S: Send + Sync,
     AppState: FromRef<S>,
 {
-    type Rejection = AuthError;
+    type Rejection = MyError;
 
     async fn from_request_parts(parts: &mut Parts, state: &S) -> Result<Self, Self::Rejection> {
         let bearer = parts
@@ -63,42 +64,18 @@ where
 
         let token = bearer.token();
 
-        let token_data = decode(token, &KEYS.decoding, &Validation::default())
-            .map_err(|_| AuthError::InvalidToken)?;
+        let token_data = decode(token, &KEYS.decoding, &Validation::default())?;
 
         let claims: Claims = token_data.claims;
 
         let app_state = AppState::from_ref(state);
-        let mut conn = app_state.db().await.unwrap();
+        let mut conn = app_state.db().await?;
         let maybe_session = Session::get_session(&mut conn, claims.sid).await?;
 
         if maybe_session.is_none() {
-            return Err(AuthError::InvalidToken);
+            return Err(MyError::Auth(AuthError::InvalidToken));
         }
 
         Ok(claims)
     }
-}
-
-impl IntoResponse for AuthError {
-    fn into_response(self) -> Response {
-        let (status, error_message) = match self {
-            AuthError::WrongCredentials => (StatusCode::UNAUTHORIZED, "Wrong credentials"),
-            AuthError::MissingCredentials => (StatusCode::BAD_REQUEST, "Missing credentials"),
-            AuthError::TokenCreation => (StatusCode::INTERNAL_SERVER_ERROR, "Token creation error"),
-            AuthError::InvalidToken => (StatusCode::BAD_REQUEST, "Invalid token"),
-        };
-        let body = Json(json!({
-            "error": error_message,
-        }));
-        (status, body).into_response()
-    }
-}
-
-#[derive(Debug)]
-pub enum AuthError {
-    WrongCredentials,
-    MissingCredentials,
-    TokenCreation,
-    InvalidToken,
 }

@@ -12,7 +12,11 @@ use uuid::Uuid;
 
 use crate::{
     AppState,
-    app::auth::{AuthError, COMPANY_NAME, Claims, KEYS},
+    app::{
+        auth::{COMPANY_NAME, Claims, KEYS},
+        error::{AuthError, MyError},
+        types::MyResult,
+    },
     db::models::{session::Session, user::User},
     utils,
 };
@@ -34,23 +38,23 @@ pub async fn login(
     TypedHeader(user_agent): TypedHeader<UserAgent>,
     ConnectInfo(addr): ConnectInfo<SocketAddr>,
     Json(payload): Json<LoginRequest>,
-) -> Result<Json<LoginResponse>, AuthError> {
+) -> MyResult<Json<LoginResponse>> {
     if payload.email.is_empty() || payload.password.is_empty() {
-        return Err(AuthError::MissingCredentials);
+        return Err(MyError::Auth(AuthError::WrongCredentials));
     }
 
-    let mut conn = state.db().await.unwrap();
+    let mut conn = state.db().await?;
 
     let maybe_user = User::get_user_by_email(&mut conn, &payload.email).await?;
 
     let Some(user) = maybe_user else {
-        return Err(AuthError::WrongCredentials);
+        return Err(MyError::Auth(AuthError::WrongCredentials));
     };
 
     let is_verified = utils::verify_password(payload.password, user.password_hash).is_ok();
 
     if !is_verified {
-        return Err(AuthError::WrongCredentials);
+        return Err(MyError::Auth(AuthError::InvalidToken));
     }
 
     let created_at = chrono::Utc::now().naive_utc();
@@ -64,8 +68,7 @@ pub async fn login(
         sid: session_id,
     };
 
-    let access_token = encode(&Header::default(), &claims, &KEYS.encoding)
-        .map_err(|_| AuthError::TokenCreation)?;
+    let access_token = encode(&Header::default(), &claims, &KEYS.encoding)?;
 
     let new_session = Session {
         id: session_id,
@@ -91,15 +94,16 @@ pub struct ProfileResponse {
     created_at: NaiveDateTime,
 }
 
-pub async fn profile(claims: Claims, state: State<AppState>) -> Json<ProfileResponse> {
-    let mut conn = state.db().await.unwrap();
+pub async fn profile(claims: Claims, state: State<AppState>) -> MyResult<Json<ProfileResponse>> {
+    let mut conn = state.db().await?;
 
-    let user = User::get_user(&mut conn, claims.sub).await.unwrap().unwrap();
+    let maybe_user = User::get_user(&mut conn, claims.sub).await?;
+    let Some(user) = maybe_user else { return Err(MyError::InternalError) };
 
     let res =
         ProfileResponse { username: user.username, email: user.email, created_at: user.created_at };
 
-    Json(res)
+    Ok(Json(res))
 }
 
 #[derive(Deserialize)]
@@ -114,16 +118,18 @@ pub async fn signup(
     TypedHeader(user_agent): TypedHeader<UserAgent>,
     ConnectInfo(addr): ConnectInfo<SocketAddr>,
     Json(input): Json<SignupRequest>,
-) -> Result<Json<LoginResponse>, AuthError> {
-    let mut conn = state.db().await.unwrap();
+) -> MyResult<Json<LoginResponse>> {
+    let mut conn = state.db().await?;
 
     let maybe_user = User::get_user_by_email(&mut conn, &input.email).await?;
 
     if maybe_user.is_some() {
-        return Err(AuthError::WrongCredentials);
+        return Err(MyError::Unauthorized);
     }
 
-    let password_hash = utils::hash_password(&input.password).unwrap();
+    let Ok(password_hash) = utils::hash_password(&input.password) else {
+        return Err(MyError::InternalError);
+    };
 
     let new_user = User {
         id: Uuid::new_v4(),
@@ -146,8 +152,7 @@ pub async fn signup(
         sid: session_id,
     };
 
-    let access_token = encode(&Header::default(), &claims, &KEYS.encoding)
-        .map_err(|_| AuthError::TokenCreation)?;
+    let access_token = encode(&Header::default(), &claims, &KEYS.encoding)?;
 
     let new_session = Session {
         id: session_id,

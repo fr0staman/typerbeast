@@ -4,7 +4,7 @@ use diesel_async::RunQueryDsl;
 use uuid::Uuid;
 
 use crate::{
-    app::{auth::AuthError, types::DbConn},
+    app::types::{DbConn, MyResult},
     db::schema::users,
 };
 
@@ -19,24 +19,16 @@ pub struct User {
 }
 
 impl User {
-    pub async fn get_user(conn: &mut DbConn, id_user: Uuid) -> Result<Option<User>, AuthError> {
+    pub async fn get_user(conn: &mut DbConn, id_user: Uuid) -> MyResult<Option<User>> {
         use crate::db::schema::users::dsl::*;
 
-        let result = users
-            .filter(id.eq(id_user))
-            .select(User::as_select())
-            .first(conn)
-            .await
-            .optional()
-            .unwrap();
+        let result =
+            users.filter(id.eq(id_user)).select(User::as_select()).first(conn).await.optional()?;
 
         Ok(result)
     }
 
-    pub async fn get_user_by_email(
-        conn: &mut DbConn,
-        user_email: &str,
-    ) -> Result<Option<User>, AuthError> {
+    pub async fn get_user_by_email(conn: &mut DbConn, user_email: &str) -> MyResult<Option<User>> {
         use crate::db::schema::users::dsl::*;
 
         let result = users
@@ -44,19 +36,14 @@ impl User {
             .select(User::as_select())
             .first(conn)
             .await
-            .optional()
-            .unwrap();
+            .optional()?;
 
         Ok(result)
     }
 
-    pub async fn insert_user(self, conn: &mut DbConn) -> Result<User, AuthError> {
+    pub async fn insert_user(self, conn: &mut DbConn) -> MyResult<User> {
         use crate::db::schema::users::dsl::*;
 
-        diesel::insert_into(users)
-            .values(self)
-            .get_result(conn)
-            .await
-            .map_err(|_| AuthError::WrongCredentials)
+        Ok(diesel::insert_into(users).values(self).get_result(conn).await?)
     }
 }
