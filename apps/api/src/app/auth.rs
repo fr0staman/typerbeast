@@ -2,7 +2,7 @@ use std::sync::LazyLock;
 
 use axum::{
     Json, RequestPartsExt,
-    extract::FromRequestParts,
+    extract::{FromRef, FromRequestParts},
     http::{StatusCode, request::Parts},
     response::{IntoResponse, Response},
 };
@@ -14,6 +14,10 @@ use jsonwebtoken::{DecodingKey, EncodingKey, Validation, decode};
 use serde::{Deserialize, Serialize};
 use serde_json::json;
 use uuid::Uuid;
+
+use crate::db::models::session::Session;
+
+use super::state::AppState;
 
 pub const COMPANY_NAME: &str = env!("CARGO_PKG_NAME");
 
@@ -47,10 +51,11 @@ pub struct Claims {
 impl<S> FromRequestParts<S> for Claims
 where
     S: Send + Sync,
+    AppState: FromRef<S>,
 {
     type Rejection = AuthError;
 
-    async fn from_request_parts(parts: &mut Parts, _: &S) -> Result<Self, Self::Rejection> {
+    async fn from_request_parts(parts: &mut Parts, state: &S) -> Result<Self, Self::Rejection> {
         let bearer = parts
             .extract::<TypedHeader<Authorization<Bearer>>>()
             .await
@@ -61,7 +66,17 @@ where
         let token_data = decode(token, &KEYS.decoding, &Validation::default())
             .map_err(|_| AuthError::InvalidToken)?;
 
-        Ok(token_data.claims)
+        let claims: Claims = token_data.claims;
+
+        let app_state = AppState::from_ref(state);
+        let mut conn = app_state.db().await.unwrap();
+        let maybe_session = Session::get_session(&mut conn, claims.sid).await?;
+
+        if maybe_session.is_none() {
+            return Err(AuthError::InvalidToken);
+        }
+
+        Ok(claims)
     }
 }
 
