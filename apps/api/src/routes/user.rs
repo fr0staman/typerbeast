@@ -4,16 +4,24 @@ use axum::{
     Json,
     extract::{ConnectInfo, State},
 };
-use axum_extra::{TypedHeader, headers::UserAgent};
+use axum_extra::{
+    TypedHeader,
+    extract::{
+        CookieJar,
+        cookie::{Cookie, SameSite},
+    },
+    headers::UserAgent,
+};
 use chrono::NaiveDateTime;
 use jsonwebtoken::{Header, encode};
 use serde::{Deserialize, Serialize};
+use time::{Duration, OffsetDateTime};
 use uuid::Uuid;
 
 use crate::{
     AppState,
     app::{
-        auth::{COMPANY_NAME, Claims, KEYS},
+        auth::{COMPANY_NAME, COOKIE_NAME, Claims, KEYS},
         error::{AuthError, MyError},
         types::MyResult,
     },
@@ -34,11 +42,12 @@ pub struct LoginResponse {
 }
 
 pub async fn login(
+    jar: CookieJar,
     state: State<AppState>,
     TypedHeader(user_agent): TypedHeader<UserAgent>,
     ConnectInfo(addr): ConnectInfo<SocketAddr>,
     Json(payload): Json<LoginRequest>,
-) -> MyResult<Json<LoginResponse>> {
+) -> MyResult<(CookieJar, Json<LoginResponse>)> {
     if payload.email.is_empty() || payload.password.is_empty() {
         return Err(MyError::Auth(AuthError::WrongCredentials));
     }
@@ -58,7 +67,7 @@ pub async fn login(
     }
 
     let created_at = chrono::Utc::now().naive_utc();
-    let expires_at = created_at + chrono::Duration::days(1);
+    let expires_at = created_at + chrono::Duration::days(7);
     let session_id = Uuid::new_v4();
 
     let claims = Claims {
@@ -82,9 +91,18 @@ pub async fn login(
 
     new_session.insert_session(&mut conn).await?;
 
+    let cookie = Cookie::build((COOKIE_NAME, access_token.clone()))
+        .path("/")
+        .http_only(true)
+        // TODO: use after live https server setup
+        // .secure(true)
+        .same_site(SameSite::Lax)
+        .max_age(Duration::days(7))
+        .expires(OffsetDateTime::from_unix_timestamp(expires_at.and_utc().timestamp()).unwrap());
+
     let res = LoginResponse { access_token, token_type: "Bearer".to_string() };
 
-    Ok(Json(res))
+    Ok((jar.add(cookie), Json(res)))
 }
 
 #[derive(Serialize, Deserialize)]
@@ -114,11 +132,12 @@ pub struct SignupRequest {
 }
 
 pub async fn signup(
+    jar: CookieJar,
     state: State<AppState>,
     TypedHeader(user_agent): TypedHeader<UserAgent>,
     ConnectInfo(addr): ConnectInfo<SocketAddr>,
     Json(input): Json<SignupRequest>,
-) -> MyResult<Json<LoginResponse>> {
+) -> MyResult<(CookieJar, Json<LoginResponse>)> {
     let mut conn = state.db().await?;
 
     let maybe_user = User::get_user_by_email(&mut conn, &input.email).await?;
@@ -142,7 +161,7 @@ pub async fn signup(
     let user = new_user.insert_user(&mut conn).await?;
 
     let created_at = chrono::Utc::now().naive_utc();
-    let expires_at = created_at + chrono::Duration::days(1);
+    let expires_at = created_at + chrono::Duration::days(7);
     let session_id = Uuid::new_v4();
 
     let claims = Claims {
@@ -166,7 +185,16 @@ pub async fn signup(
 
     new_session.insert_session(&mut conn).await?;
 
+    let cookie = Cookie::build((COOKIE_NAME, access_token.clone()))
+        .path("/")
+        .http_only(true)
+        // TODO: use after live https server setup
+        // .secure(true)
+        .same_site(SameSite::Lax)
+        .max_age(Duration::days(7))
+        .expires(OffsetDateTime::from_unix_timestamp(expires_at.and_utc().timestamp()).unwrap());
+
     let res = LoginResponse { access_token, token_type: "Bearer".to_string() };
 
-    Ok(Json(res))
+    Ok((jar.add(cookie), Json(res)))
 }

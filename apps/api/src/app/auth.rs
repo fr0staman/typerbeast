@@ -7,6 +7,7 @@ use axum::{
 };
 use axum_extra::{
     TypedHeader,
+    extract::CookieJar,
     headers::{Authorization, authorization::Bearer},
 };
 use jsonwebtoken::{DecodingKey, EncodingKey, Validation, decode};
@@ -21,6 +22,7 @@ use super::{
 };
 
 pub const COMPANY_NAME: &str = env!("CARGO_PKG_NAME");
+pub const COOKIE_NAME: &str = concat!(env!("CARGO_PKG_NAME"), "_token");
 
 pub static KEYS: LazyLock<Keys> = LazyLock::new(|| {
     let secret = crate::app::config::load_config().jwt_secret;
@@ -57,12 +59,16 @@ where
     type Rejection = MyError;
 
     async fn from_request_parts(parts: &mut Parts, state: &S) -> Result<Self, Self::Rejection> {
-        let bearer = parts
-            .extract::<TypedHeader<Authorization<Bearer>>>()
+        let (jar, bearer_header) = parts
+            .extract::<(CookieJar, Option<TypedHeader<Authorization<Bearer>>>)>()
             .await
             .map_err(|_| AuthError::InvalidToken)?;
 
-        let token = bearer.token();
+        let token = jar
+            .get(COOKIE_NAME)
+            .map(|cookie| cookie.value())
+            .or_else(|| bearer_header.as_ref().map(|header| header.token()))
+            .ok_or(AuthError::InvalidToken)?;
 
         let token_data = decode(token, &KEYS.decoding, &Validation::default())?;
 

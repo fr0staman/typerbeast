@@ -6,7 +6,7 @@ edition = "2024"
 [dependencies]
 argon2 = { version = "0.5.3", features = ["alloc", "password-hash"] }
 axum = { version = "0.8.3" }
-axum-extra = { version = "0.10.1", features = ["typed-header"] }
+axum-extra = { version = "0.10.1", features = ["typed-header", "cookie"] }
 chrono = { version = "0.4.40", default-features = false, features = ["now", "serde"] }
 config = { version = "0.15.11", default-features = false }
 deadpool-runtime = { version = "0.1.4", features = ["tokio_1"] }
@@ -21,6 +21,7 @@ rand_core = { version = "0.6.4", default-features = false, features = ["getrando
 serde = { version = "1.0.219", features = ["derive"] }
 serde_json = "1.0.140"
 thiserror = "2.0.12"
+time = { version = "0.3.41", default-features = false, features = ["std"] }
 tokio = { version = "1.44.2", features = ["full"] }
 uuid = { version = "1.16.0", features = ["serde", "v4"] }
 
