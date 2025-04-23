@@ -5,7 +5,7 @@ edition = "2024"
 
 [dependencies]
 argon2 = { version = "0.5.3", features = ["alloc", "password-hash"] }
-axum = { version = "0.8.3" }
+axum = { version = "0.8.3", features = ["macros"] }
 axum-extra = { version = "0.10.1", features = ["typed-header", "cookie"] }
 chrono = { version = "0.4.40", default-features = false, features = ["now", "serde"] }
 config = { version = "0.15.11", default-features = false }

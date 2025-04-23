@@ -15,6 +15,9 @@ pub enum MyError {
     #[error("{0}")]
     Auth(#[from] AuthError),
 
+    #[error("Not found, recheck your ids")]
+    NotFound,
+
     #[error("Unauthorized access")]
     Unauthorized,
 
@@ -45,6 +48,7 @@ pub enum MyError {
 impl MyError {
     fn get_status_code(&self) -> StatusCode {
         match *self {
+            MyError::NotFound => StatusCode::NOT_FOUND,
             MyError::Auth(AuthError::WrongCredentials) => StatusCode::UNAUTHORIZED,
             MyError::Auth(AuthError::InvalidToken) => StatusCode::UNAUTHORIZED,
             MyError::Unauthorized => StatusCode::UNAUTHORIZED,
