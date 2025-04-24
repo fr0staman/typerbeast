@@ -4,9 +4,11 @@
     "lint": "eslint ."
   },
   "dependencies": {
-    "@gluestack-style/react": "^1.0.57",
     "@gluestack-ui/button": "^1.0.14",
-    "@gluestack-ui/themed": "^1.1.73",
+    "@gluestack-ui/icon": "^0.1.27",
+    "@gluestack-ui/overlay": "^0.1.22",
+    "@gluestack-ui/toast": "^1.0.9",
+    "@legendapp/motion": "^2.4.0",
     "autoprefixer": "^10.4.21",
     "nativewind": "^4.1.23",
     "postcss": "^8.5.3",
