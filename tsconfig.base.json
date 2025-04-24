@@ -20,7 +20,9 @@
       "@/config/*": ["packages/config/*"],
       "@/types/*": ["packages/types/*"],
       "@/ui/*": ["packages/ui/*"],
-    }
+      "@/apps/*": ["apps/*"]
+    },
+    "jsxImportSource": "nativewind"
   },
-  "exclude": ["node_modules"]
+  "exclude": ["node_modules"],
 }

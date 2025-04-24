@@ -1,6 +1,7 @@
 {
   "extends": "../../tsconfig.base.json",
   "compilerOptions": {
+    "jsxImportSource": "nativewind",
     "lib": [
       "dom",
       "dom.iterable",
@@ -16,6 +17,7 @@
   },
   "include": [
     "next-env.d.ts",
+    "nativewind-env.d.ts",
     "**/*.ts",
     "**/*.tsx",
     ".next/types/**/*.ts"
