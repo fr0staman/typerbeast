@@ -4,11 +4,23 @@ import { useState } from "react";
 import { Platform, View } from "react-native";
 import { Button, ButtonText } from "@/ui/components/Button";
 import { Text } from "@/ui/components/Text";
-import { Toast, ToastDescription, ToastTitle, useToast } from "./Toast";
+import {
+  Toast,
+  ToastDescription,
+  ToastTitle,
+  useToast,
+} from "@/ui/components/Toast";
+import { useLink } from "solito/navigation";
 
-export const Home = () => {
+const CHOSEN_USER = "fr0staman";
+
+export const HomeScreen = () => {
   const toast = useToast();
   const [toastId, setToastId] = useState(0);
+  const linkProps = useLink({
+    href: `/user/${CHOSEN_USER}`,
+  });
+
   const handleToast = () => {
     if (!toast.isActive(toastId.toString())) {
       showNewToast();
@@ -51,9 +63,14 @@ export const Home = () => {
             : "This is the mobile app."}
         </Text>
 
-        <Button className="mt-6" onPress={handleToast}>
-          <ButtonText>Start Typing</ButtonText>
-        </Button>
+        <View className="flex gap-4 items-center flex-col sm:flex-row">
+          <Button className="mt-6" onPress={handleToast}>
+            <ButtonText>Start Typing</ButtonText>
+          </Button>
+          <Button className="mt-6" {...linkProps}>
+            <ButtonText>Go to {CHOSEN_USER}</ButtonText>
+          </Button>
+        </View>
       </View>
     </View>
   );

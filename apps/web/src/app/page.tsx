@@ -1,5 +1,5 @@
-import { Home as HomeComponent } from "@/ui/components/Home";
+import { HomeScreen } from "@/app/features/Home";
 
 export default function Home() {
-  return <HomeComponent />;
+  return <HomeScreen />;
 }

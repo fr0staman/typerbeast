@@ -8,6 +8,7 @@ module.exports = {
         alias: {
           // define aliases to shorten the import paths
           "@/ui": "../../packages/ui",
+          "@/app": "../../packages/app",
         },
         extensions: [".js", ".jsx", ".tsx", ".ios.js", ".android.js"],
       },
