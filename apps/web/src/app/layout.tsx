@@ -1,5 +1,7 @@
 import type { Metadata } from "next";
 import "@/ui/css/globals.css";
+import StyledJsxRegistry from "../components/registry";
+import { GluestackUIProvider } from "@/ui/providers/gluestack";
 
 export const metadata: Metadata = {
   title: "Create Next App",
@@ -12,8 +14,12 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
-      <body className={"antialiased"}>{children}</body>
+    <html lang="en" className="dark" style={{ colorScheme: "dark" }}>
+      <body className={"antialiased"} style={{ display: "flex" }}>
+        <StyledJsxRegistry>
+          <GluestackUIProvider mode="system">{children}</GluestackUIProvider>
+        </StyledJsxRegistry>
+      </body>
     </html>
   );
 }

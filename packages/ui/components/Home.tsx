@@ -1,42 +1,59 @@
 "use client";
 
-import { Platform, Pressable, Text, View, Alert } from "react-native";
+import { useState } from "react";
+import { Platform, View } from "react-native";
+import { Button, ButtonText } from "@/ui/components/Button";
+import { Text } from "@/ui/components/Text";
+import { Toast, ToastDescription, ToastTitle, useToast } from "./Toast";
 
 export const Home = () => {
-  const containerStyle = Platform.select({
-    default: "flex-1",
-    web: "min-h-screen",
-  });
+  const toast = useToast();
+  const [toastId, setToastId] = useState(0);
+  const handleToast = () => {
+    if (!toast.isActive(toastId.toString())) {
+      showNewToast();
+    }
+  };
+  const showNewToast = () => {
+    const newId = Math.random();
+    setToastId(newId);
+    toast.show({
+      id: newId.toString(),
+      placement: "top",
+      duration: 3000,
+      render: ({ id }) => {
+        const uniqueToastId = "toast-" + id;
+        return (
+          <Toast nativeID={uniqueToastId} action="muted" variant="solid">
+            <ToastTitle>Hello!</ToastTitle>
+            <ToastDescription>
+              This is a customized toast message.
+            </ToastDescription>
+          </Toast>
+        );
+      },
+    });
+  };
 
   return (
     <View
       className={
-        containerStyle +
-        " items-center justify-items-center p-8 pb-20 gap-16 sm:p-20 bg-white dark:bg-black"
+        "flex-1 min-h-screen items-center justify-items-center p-8 pb-20 gap-16 sm:p-20 bg-white dark:bg-black"
       }
     >
       <View className={"flex-1 items-center justify-center"}>
-        <Text className="text-3xl font-bold text-gray-900 dark:text-white text-center">
+        <Text bold size="3xl">
           Welcome to TyperBeast 👾
         </Text>
-        <Text className="mt-4 text-lg text-gray-600 dark:text-gray-300 text-center">
+        <Text className="mt-4" size="lg">
           {Platform.OS === "web"
             ? "This is the web app."
             : "This is the mobile app."}
         </Text>
 
-        <Pressable
-          className={
-            "mt-6 rounded-xl bg-indigo-600 px-4 py-2 hover:bg-indigo-700 active:opacity-80"
-          }
-          onPress={
-            Platform.OS === "web"
-              ? () => alert("Wow, it works!")
-              : () => Alert.alert("Wow, it works!")
-          }
-        >
-          <Text className="text-white text-lg font-medium">Start Typing</Text>
-        </Pressable>
+        <Button className="mt-6" onPress={handleToast}>
+          <ButtonText>Start Typing</ButtonText>
+        </Button>
       </View>
     </View>
   );

@@ -5,7 +5,7 @@ module.exports = {
   ...sharedConfig,
   important: "html",
   content: [
-    "../../packages/ui/components/*.{js,ts,jsx,tsx}",
+    "../../packages/ui/components/**/*.{js,ts,jsx,tsx}",
     "./src/**/*.{js,ts,jsx,tsx}",
   ],
 };

@@ -1,4 +1,7 @@
 import type { NextConfig } from "next";
+// This adapter downloads entire next 13 and not maintained well.
+// So, I added transpilePackages from sources by myself :P
+// import { withGluestackUI } from "@gluestack/ui-next-adapter";
 
 const nextConfig: NextConfig = {
   /* FIXME: https://github.com/vercel/next.js/issues/43886
@@ -37,11 +40,12 @@ const nextConfig: NextConfig = {
     return config;
   },
   transpilePackages: [
-    "react-native-web",
-    "react-native",
     "nativewind",
-    "@/ui",
+    "react-native-reanimated",
     "react-native-css-interop",
+    "@expo",
+    "expo-",
+    "@gluestack-ui",
   ],
 };
 
