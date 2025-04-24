@@ -47,6 +47,7 @@ const nextConfig: NextConfig = {
     "expo-",
     "@gluestack-ui",
   ],
+  compress: false,
 };
 
 export default nextConfig;
