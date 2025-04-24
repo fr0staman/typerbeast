@@ -14,18 +14,10 @@ const compat = new FlatCompat({
 
 export default typescriptEslint.config(
   ...typescriptEslint.configs.recommended,
-  ...typescriptEslint.configs.recommendedTypeChecked,
   ...migratedRules,
   ...compat.extends("plugin:prettier/recommended"),
   {
     languageOptions: {
-      parserOptions: {
-        project: ["../../../tsconfig.base.json"],
-        tsconfigRootDir: __dirname,
-        ecmaFeatures: {
-          jsx: true,
-        },
-      },
       globals: {
         ...globals.browser,
         ...globals.node,
