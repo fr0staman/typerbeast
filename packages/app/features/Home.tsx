@@ -2,14 +2,15 @@
 
 import { useState } from "react";
 import { Platform, View } from "react-native";
-import { Button, ButtonText } from "@/ui/components/Button";
-import { Text } from "@/ui/components/Text";
 import {
   Toast,
   ToastDescription,
   ToastTitle,
   useToast,
-} from "@/ui/components/Toast";
+  Text,
+  Button,
+  ButtonText,
+} from "@/ui/components";
 import { useLink } from "solito/navigation";
 import { useAppTranslation } from "@/app/i18n/hooks";
 

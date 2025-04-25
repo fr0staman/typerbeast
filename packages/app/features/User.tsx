@@ -1,7 +1,6 @@
 "use client";
 
-import { Button, ButtonText } from "@/ui/components/Button";
-import { Text } from "@/ui/components/Text";
+import { Text, Button, ButtonText } from "@/ui/components";
 import { View } from "react-native";
 import { useParams, useRouter } from "solito/navigation";
 import { useAppTranslation } from "../i18n/hooks";
