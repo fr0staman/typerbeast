@@ -1,6 +1,7 @@
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import { HomeScreen } from "@/app/features/Home";
 import { UserScreen } from "@/app/features/User";
+import { useAppTranslation } from "../i18n/hooks";
 
 const Stack = createNativeStackNavigator<{
   home: undefined;
@@ -10,6 +11,8 @@ const Stack = createNativeStackNavigator<{
 }>();
 
 export function AppStack() {
+  const { t } = useAppTranslation("seo");
+
   return (
     <Stack.Navigator>
       <Stack.Screen
@@ -23,7 +26,7 @@ export function AppStack() {
         name="user"
         component={UserScreen}
         options={props => ({
-          title: "USER: " + props.route.params.username,
+          title: t("user.title", { id: props.route.params.username }),
         })}
       />
     </Stack.Navigator>

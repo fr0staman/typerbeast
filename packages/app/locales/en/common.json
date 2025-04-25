@@ -1,0 +1,11 @@
+{
+  "welcome": "Welcome to TyperBeast 👾",
+  "username": "Username",
+  "linkToUser": "Link to user {{id}}",
+  "startTyping": "Start typing",
+  "toastTitle": "Hello! This it Toast!",
+  "toastDescription": "Just showing how toast works...",
+  "thisIsWeb": "This is web app.",
+  "thisIsMobile": "This is mobile app.",
+  "goHome": "Go Home"
+}

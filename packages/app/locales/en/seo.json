@@ -1,0 +1,10 @@
+{
+  "home": {
+    "title": "Home • Typerbeast",
+    "description": "Gluestack, Nativewind, Solito, Redux Toolkit, i18next, React Native & Next.js"
+  },
+  "user": {
+    "title": "User: {{id}}",
+    "description": "Just user with ID: {{id}}"
+  }
+}

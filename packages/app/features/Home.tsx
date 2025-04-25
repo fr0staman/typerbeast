@@ -11,12 +11,15 @@ import {
   useToast,
 } from "@/ui/components/Toast";
 import { useLink } from "solito/navigation";
+import { useAppTranslation } from "@/app/i18n/hooks";
 
 const CHOSEN_USER = "fr0staman";
 
 export const HomeScreen = () => {
   const toast = useToast();
   const [toastId, setToastId] = useState(0);
+
+  const { t } = useAppTranslation("common");
   const linkProps = useLink({
     href: `/user/${CHOSEN_USER}`,
   });
@@ -37,10 +40,8 @@ export const HomeScreen = () => {
         const uniqueToastId = "toast-" + id;
         return (
           <Toast nativeID={uniqueToastId} action="muted" variant="solid">
-            <ToastTitle>Hello!</ToastTitle>
-            <ToastDescription>
-              This is a customized toast message.
-            </ToastDescription>
+            <ToastTitle>{t("toastTitle")}</ToastTitle>
+            <ToastDescription>{t("toastDescription")}</ToastDescription>
           </Toast>
         );
       },
@@ -55,20 +56,18 @@ export const HomeScreen = () => {
     >
       <View className={"flex-1 items-center justify-center"}>
         <Text bold size="3xl">
-          Welcome to TyperBeast 👾
+          {t("welcome")}
         </Text>
         <Text className="mt-4" size="lg">
-          {Platform.OS === "web"
-            ? "This is the web app."
-            : "This is the mobile app."}
+          {Platform.OS === "web" ? t("thisIsWeb") : t("thisIsMobile")}
         </Text>
 
         <View className="flex gap-4 items-center flex-col sm:flex-row">
           <Button className="mt-6" onPress={handleToast}>
-            <ButtonText>Start Typing</ButtonText>
+            <ButtonText>{t("startTyping")}</ButtonText>
           </Button>
           <Button className="mt-6" {...linkProps}>
-            <ButtonText>Go to {CHOSEN_USER}</ButtonText>
+            <ButtonText>{t("linkToUser", { id: CHOSEN_USER })}</ButtonText>
           </Button>
         </View>
       </View>

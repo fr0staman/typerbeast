@@ -1,0 +1,10 @@
+{
+  "home": {
+    "title": "Домашня • Typerbeast",
+    "description": "Gluestack, Nativewind, Solito, Redux Toolkit, i18next, React Native & Next.js"
+  },
+  "user": {
+    "title": "Користувач: {{id}}",
+    "description": "Просто користувач з ID: {{id}}"
+  }
+}
