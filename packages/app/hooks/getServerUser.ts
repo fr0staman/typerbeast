@@ -1,7 +1,7 @@
 import { cookies } from "next/headers";
-import { PUBLIC_API_URL } from "../store/config";
+import { PUBLIC_API_URL } from "@/app/store/config";
 
-const COOKIE_NAME = "typerbeast-api_token";
+export const COOKIE_NAME = "typerbeast-api_token";
 
 export async function getServerUser() {
   const cookieStore = await cookies();

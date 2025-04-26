@@ -5,7 +5,8 @@ import {
   languages,
   cookieName,
   headerName,
-} from "../../../packages/app/i18n/settings";
+} from "@/app/i18n/settings";
+import { COOKIE_NAME } from "@/app/hooks/getServerUser";
 
 acceptLanguage.languages(languages as unknown as string[]);
 
@@ -16,13 +17,21 @@ export const config = {
   ],
 };
 
+const PUBLIC_PATHS = ["/login"];
+
 export function middleware(req: NextRequest) {
+  const { pathname } = req.nextUrl;
   // Ignore paths with "icon" or "chrome"
-  if (
-    req.nextUrl.pathname.indexOf("icon") > -1 ||
-    req.nextUrl.pathname.indexOf("chrome") > -1
-  )
+  if (pathname.indexOf("icon") > -1 || pathname.indexOf("chrome") > -1) {
     return NextResponse.next();
+  }
+
+  if (
+    !PUBLIC_PATHS.some(path => pathname.includes(path)) &&
+    !req.cookies.has(COOKIE_NAME)
+  ) {
+    return NextResponse.redirect(new URL("/login", req.url));
+  }
 
   let lng;
   // Try to get language from cookie
@@ -34,17 +43,15 @@ export function middleware(req: NextRequest) {
   if (!lng) lng = fallbackLng;
 
   // Check if the language is already in the path
-  const lngInPath = languages.find(loc =>
-    req.nextUrl.pathname.startsWith(`/${loc}`),
-  );
+  const lngInPath = languages.find(loc => pathname.startsWith(`/${loc}`));
 
   const headers = new Headers(req.headers);
   headers.set(headerName, lngInPath || lng);
 
   // If the language is not in the path, redirect to include it
-  if (!lngInPath && !req.nextUrl.pathname.startsWith("/_next")) {
+  if (!lngInPath && !pathname.startsWith("/_next")) {
     return NextResponse.redirect(
-      new URL(`/${lng}${req.nextUrl.pathname}${req.nextUrl.search}`, req.url),
+      new URL(`/${lng}${pathname}${req.nextUrl.search}`, req.url),
     );
   }
 
