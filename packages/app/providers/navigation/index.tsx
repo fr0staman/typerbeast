@@ -21,8 +21,9 @@ export const AppNavContainer = ({
         () => ({
           prefixes: ["/"],
           config: {
-            initialRouteName: "home",
+            initialRouteName: "login",
             screens: {
+              login: "login",
               home: "",
               user: "user/:username",
             },

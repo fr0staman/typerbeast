@@ -1,3 +1,5 @@
+export { Box } from "./Box";
+export { VStack } from "./VStack";
 export {
   Button,
   ButtonText,
@@ -7,3 +9,5 @@ export {
 } from "./Button";
 export { Text } from "./Text";
 export { Toast, ToastDescription, ToastTitle, useToast } from "./Toast";
+export { Heading } from "./Heading";
+export { Input, InputField, InputIcon, InputSlot } from "./Input";

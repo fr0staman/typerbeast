@@ -1547,6 +1547,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@expo/html-elements@npm:^0.11.2":
+  version: 0.11.2
+  resolution: "@expo/html-elements@npm:0.11.2"
+  checksum: 10c0/42a31020a76ce4a6219494d900c99347f37c768db9c78d07c94b5a2d9f373da2c8d92d8e06229c6c6bdd671258a4bd022b0dd31a4e8ba15afc4caadb9d9ba063
+  languageName: node
+  linkType: hard
+
 "@formatjs/ecma402-abstract@npm:2.3.4":
   version: 2.3.4
   resolution: "@formatjs/ecma402-abstract@npm:2.3.4"
@@ -1612,6 +1619,19 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@gluestack-ui/form-control@npm:^0.1.19":
+  version: 0.1.19
+  resolution: "@gluestack-ui/form-control@npm:0.1.19"
+  dependencies:
+    "@gluestack-ui/utils": "npm:^0.1.14"
+    "@react-native-aria/focus": "npm:^0.2.9"
+  peerDependencies:
+    react: ">=16"
+    react-dom: ">=16"
+  checksum: 10c0/c12dfe53bd676fb2ccf0abac44a0a05f47aed7b13d332b9002dfed8e15e997a8f99818cb937b36bfafe4cb95758eeb2fb82cc20096bc0ad0b2a5ba8751bb7e2a
+  languageName: node
+  linkType: hard
+
 "@gluestack-ui/hooks@npm:0.1.13":
   version: 0.1.13
   resolution: "@gluestack-ui/hooks@npm:0.1.13"
@@ -1633,6 +1653,21 @@ __metadata:
     react: ">=16"
     react-dom: ">=16"
   checksum: 10c0/c5024819d548fa79847ece23c4d2059de799334356d4c88d0fc8b3b96fac4efdcac1a589e5a4b615d98ec12439fe39ab8e61adae05f7e46adc60038a1692d7f9
+  languageName: node
+  linkType: hard
+
+"@gluestack-ui/input@npm:^0.1.38":
+  version: 0.1.38
+  resolution: "@gluestack-ui/input@npm:0.1.38"
+  dependencies:
+    "@gluestack-ui/form-control": "npm:^0.1.19"
+    "@gluestack-ui/utils": "npm:^0.1.15"
+    "@react-native-aria/focus": "npm:^0.2.9"
+    "@react-native-aria/interactions": "npm:0.2.16"
+  peerDependencies:
+    react: ">=16"
+    react-dom: ">=16"
+  checksum: 10c0/cd8bb092aa6d223b85f4dd5dc64433d83b7bd85376030ad750830879fd3f76b0dc9b93cc1915a9e83b47d8a38e3faf788f1c0dbc9eeffeb63e8010d5d2788bdf
   languageName: node
   linkType: hard
 
@@ -1721,7 +1756,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@gluestack-ui/utils@npm:0.1.15, @gluestack-ui/utils@npm:^0.1.14":
+"@gluestack-ui/utils@npm:0.1.15, @gluestack-ui/utils@npm:^0.1.14, @gluestack-ui/utils@npm:^0.1.15":
   version: 0.1.15
   resolution: "@gluestack-ui/utils@npm:0.1.15"
   dependencies:
@@ -2693,6 +2728,17 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@react-native-async-storage/async-storage@npm:^2.1.2":
+  version: 2.1.2
+  resolution: "@react-native-async-storage/async-storage@npm:2.1.2"
+  dependencies:
+    merge-options: "npm:^3.0.4"
+  peerDependencies:
+    react-native: ^0.0.0-0 || >=0.65 <1.0
+  checksum: 10c0/8f3d6ff1b32ef8705c5c8be8248988cfbfd571c0e8142b8aef15429f13ddc9a018792b4be837215f6592c76b9cd99a931d4f0ab4182eebd8bddede458d484053
+  languageName: node
+  linkType: hard
+
 "@react-native-community/cli-clean@npm:18.0.0":
   version: 18.0.0
   resolution: "@react-native-community/cli-clean@npm:18.0.0"
@@ -3289,6 +3335,24 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@tanstack/query-core@npm:5.74.4":
+  version: 5.74.4
+  resolution: "@tanstack/query-core@npm:5.74.4"
+  checksum: 10c0/e74d0520b2ee14c8a65f9ff00e335cb9d25453b8af08d776ff3f7a6ba24178cbf4d6a884412df5a0747737e4ca87f637dafaad2c0f0e6afd7cd22e32e0d7dced
+  languageName: node
+  linkType: hard
+
+"@tanstack/react-query@npm:^5.74.4":
+  version: 5.74.4
+  resolution: "@tanstack/react-query@npm:5.74.4"
+  dependencies:
+    "@tanstack/query-core": "npm:5.74.4"
+  peerDependencies:
+    react: ^18 || ^19
+  checksum: 10c0/4434b1764efd5e5a7f35046e7411fed06d42372ebbd6e784dcfd81c3d107b41c86fec2b59652fccadb1bab25ca35ef9b6720c7f5c89d6e4302cf1d2f60291200
+  languageName: node
+  linkType: hard
+
 "@types/babel__core@npm:^7.1.14":
   version: 7.20.5
   resolution: "@types/babel__core@npm:7.20.5"
@@ -3799,8 +3863,10 @@ __metadata:
     "@gluestack-ui/overlay": "npm:^0.1.22"
     "@gluestack-ui/toast": "npm:^1.0.9"
     "@legendapp/motion": "npm:^2.4.0"
+    "@react-native-async-storage/async-storage": "npm:^2.1.2"
     "@react-navigation/native": "npm:^7.1.6"
     "@react-navigation/native-stack": "npm:^7.3.10"
+    "@tanstack/react-query": "npm:^5.74.4"
     autoprefixer: "npm:^10.4.21"
     eslint: "npm:^9"
     nativewind: "npm:^4.1.23"
@@ -3813,6 +3879,7 @@ __metadata:
     solito: "npm:^4.4.1"
     tailwind-variants: "npm:^1.0.0"
     tailwindcss: "npm:^3.4.17"
+    zustand: "npm:^5.0.3"
   languageName: unknown
   linkType: soft
 
@@ -5145,6 +5212,13 @@ __metadata:
     domelementtype: "npm:^2.3.0"
     domhandler: "npm:^5.0.3"
   checksum: 10c0/47938f473b987ea71cd59e59626eb8666d3aa8feba5266e45527f3b636c7883cca7e582d901531961f742c519d7514636b7973353b648762b2e3bedbf235fada
+  languageName: node
+  linkType: hard
+
+"dotenv@npm:^16.4.5":
+  version: 16.5.0
+  resolution: "dotenv@npm:16.5.0"
+  checksum: 10c0/5bc94c919fbd955bf0ba44d33922a1e93d1078e64a1db5c30faeded1d996e7a83c55332cb8ea4fae5a9ca4d0be44cbceb95c5811e70f9f095298df09d1997dd9
   languageName: node
   linkType: hard
 
@@ -6822,6 +6896,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"is-plain-obj@npm:^2.1.0":
+  version: 2.1.0
+  resolution: "is-plain-obj@npm:2.1.0"
+  checksum: 10c0/e5c9814cdaa627a9ad0a0964ded0e0491bfd9ace405c49a5d63c88b30a162f1512c069d5b80997893c4d0181eadc3fed02b4ab4b81059aba5620bfcdfdeb9c53
+  languageName: node
+  linkType: hard
+
 "is-regex@npm:^1.2.1":
   version: 1.2.1
   resolution: "is-regex@npm:1.2.1"
@@ -8037,6 +8118,15 @@ __metadata:
   languageName: node
   linkType: hard
 
+"merge-options@npm:^3.0.4":
+  version: 3.0.4
+  resolution: "merge-options@npm:3.0.4"
+  dependencies:
+    is-plain-obj: "npm:^2.1.0"
+  checksum: 10c0/02b5891ceef09b0b497b5a0154c37a71784e68ed71b14748f6fd4258ffd3fe4ecd5cb0fd6f7cae3954fd11e7686c5cb64486daffa63c2793bbe8b614b61c7055
+  languageName: node
+  linkType: hard
+
 "merge-stream@npm:^2.0.0":
   version: 2.0.0
   resolution: "merge-stream@npm:2.0.0"
@@ -8475,6 +8565,7 @@ __metadata:
     "@babel/core": "npm:^7.25.2"
     "@babel/preset-env": "npm:^7.25.3"
     "@babel/runtime": "npm:^7.25.0"
+    "@react-native-async-storage/async-storage": "npm:^2.1.2"
     "@react-native-community/cli": "npm:18.0.0"
     "@react-native-community/cli-platform-android": "npm:18.0.0"
     "@react-native-community/cli-platform-ios": "npm:18.0.0"
@@ -8489,6 +8580,7 @@ __metadata:
     nativewind: "npm:^4.1.23"
     react: "npm:19.0.0"
     react-native: "npm:0.79.1"
+    react-native-dotenv: "npm:^3.4.11"
     react-native-localize: "npm:^3.4.1"
     react-native-reanimated: "npm:^3.17.4"
     react-native-safe-area-context: "npm:^5.4.0"
@@ -9556,6 +9648,17 @@ __metadata:
     react-native-svg:
       optional: true
   checksum: 10c0/d6052499b8615b58e02ee43b7d2906fd2b5ef90410c26af94dd11d6d93ed116ab0c96f7228573734030f1d41b4e8e2878a63b2223eb86c797730df207ed0c2f0
+  languageName: node
+  linkType: hard
+
+"react-native-dotenv@npm:^3.4.11":
+  version: 3.4.11
+  resolution: "react-native-dotenv@npm:3.4.11"
+  dependencies:
+    dotenv: "npm:^16.4.5"
+  peerDependencies:
+    "@babel/runtime": ^7.20.6
+  checksum: 10c0/9ed4a37fb59030706d17a1cc49d05af9d8fc57dcb2ef97e122b844f3ab6f6331ebc089afac559fe5bddf37806aa282b4118005f1b27aae5e37fdc3fc8bd7625c
   languageName: node
   linkType: hard
 
@@ -11264,8 +11367,10 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "ui@workspace:packages/ui"
   dependencies:
+    "@expo/html-elements": "npm:^0.11.2"
     "@gluestack-ui/button": "npm:^1.0.14"
     "@gluestack-ui/icon": "npm:^0.1.27"
+    "@gluestack-ui/input": "npm:^0.1.38"
     "@gluestack-ui/overlay": "npm:^0.1.22"
     "@gluestack-ui/toast": "npm:^1.0.9"
     "@legendapp/motion": "npm:^2.4.0"
@@ -11818,5 +11923,26 @@ __metadata:
   version: 0.1.0
   resolution: "yocto-queue@npm:0.1.0"
   checksum: 10c0/dceb44c28578b31641e13695d200d34ec4ab3966a5729814d5445b194933c096b7ced71494ce53a0e8820685d1d010df8b2422e5bf2cdea7e469d97ffbea306f
+  languageName: node
+  linkType: hard
+
+"zustand@npm:^5.0.3":
+  version: 5.0.3
+  resolution: "zustand@npm:5.0.3"
+  peerDependencies:
+    "@types/react": ">=18.0.0"
+    immer: ">=9.0.6"
+    react: ">=18.0.0"
+    use-sync-external-store: ">=1.2.0"
+  peerDependenciesMeta:
+    "@types/react":
+      optional: true
+    immer:
+      optional: true
+    react:
+      optional: true
+    use-sync-external-store:
+      optional: true
+  checksum: 10c0/dad96c6c123fda088c583d5df6692e9245cd207583078dc15f93d255a67b0f346bad4535545c98852ecde93d254812a0c799579dfde2ab595016b99fbe20e4d5
   languageName: node
   linkType: hard

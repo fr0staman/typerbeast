@@ -1,7 +1,11 @@
 import { HomeScreen } from "@/app/features/Home";
+
 import type { Metadata } from "next";
 import { getT } from "../../i18n/server";
-import { languages } from "../../../../../packages/app/i18n/settings";
+import { languages } from "@/app/i18n/settings";
+import { getServerUser } from "@/app/hooks/getServerUser";
+import { SessionProvider } from "@/app/providers/session";
+import { redirect } from "next/navigation";
 
 type Props = {
   params: Promise<{
@@ -23,6 +27,16 @@ export async function generateMetadata({}: Props): Promise<Metadata> {
   };
 }
 
-export default function Home() {
-  return <HomeScreen />;
+export default async function Home() {
+  const data = await getServerUser();
+
+  if (!data) {
+    redirect("/login");
+  }
+
+  return (
+    <SessionProvider>
+      <HomeScreen />
+    </SessionProvider>
+  );
 }

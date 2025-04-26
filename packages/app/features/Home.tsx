@@ -13,24 +13,24 @@ import {
 } from "@/ui/components";
 import { useLink } from "solito/navigation";
 import { useAppTranslation } from "@/app/i18n/hooks";
-
-const CHOSEN_USER = "fr0staman";
+import { useSession } from "@/app/hooks/useSession";
 
 export const HomeScreen = () => {
+  const { data } = useSession();
+
   const toast = useToast();
   const [toastId, setToastId] = useState(0);
 
   const { t } = useAppTranslation("common");
-  const linkProps = useLink({
-    href: `/user/${CHOSEN_USER}`,
-  });
+  const CHOSEN_USER = data?.username;
 
-  const handleToast = () => {
+  function handleToast() {
     if (!toast.isActive(toastId.toString())) {
       showNewToast();
     }
-  };
-  const showNewToast = () => {
+  }
+
+  function showNewToast() {
     const newId = Math.random();
     setToastId(newId);
     toast.show({
@@ -47,7 +47,14 @@ export const HomeScreen = () => {
         );
       },
     });
-  };
+  }
+
+  const linkProps = useLink({
+    href: `/user/${CHOSEN_USER}`,
+  });
+
+  const platformMessage =
+    Platform.OS === "web" ? t("thisIsWeb") : t("thisIsMobile");
 
   return (
     <View
@@ -60,7 +67,7 @@ export const HomeScreen = () => {
           {t("welcome")}
         </Text>
         <Text className="mt-4" size="lg">
-          {Platform.OS === "web" ? t("thisIsWeb") : t("thisIsMobile")}
+          {platformMessage}
         </Text>
 
         <View className="flex gap-4 items-center flex-col sm:flex-row">

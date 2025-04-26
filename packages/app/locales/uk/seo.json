@@ -1,10 +1,14 @@
 {
   "home": {
     "title": "Домашня • Typerbeast",
-    "description": "Gluestack, Nativewind, Solito, Redux Toolkit, i18next, React Native & Next.js"
+    "description": "Gluestack, Nativewind, Solito, Zustand, i18next, React Native & Next.js"
   },
   "user": {
     "title": "Користувач: {{id}}",
     "description": "Просто користувач з ID: {{id}}"
+  },
+  "login": {
+    "title": "Логін",
+    "description": "Привіт знову!"
   }
 }

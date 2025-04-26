@@ -1,10 +1,14 @@
 {
   "home": {
     "title": "Home • Typerbeast",
-    "description": "Gluestack, Nativewind, Solito, Redux Toolkit, i18next, React Native & Next.js"
+    "description": "Gluestack, Nativewind, Solito, Zustand, i18next, React Native & Next.js"
   },
   "user": {
     "title": "User: {{id}}",
     "description": "Just user with ID: {{id}}"
+  },
+  "login": {
+    "title": "Login",
+    "description": "Welcome back!"
   }
 }

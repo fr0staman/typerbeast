@@ -1,17 +1,19 @@
 /* eslint-disable react-native/no-inline-styles */
 import "@/ui/css/globals.css";
 
+import { notFound } from "next/navigation";
+
 import StyledJsxRegistry from "../../components/registry";
 import { GluestackUIProvider } from "@/ui/providers/gluestack";
 import { getT } from "../../i18n/server";
 import { Language, languages } from "@/app/i18n/settings";
-import { notFound } from "next/navigation";
+import { QueryProvider } from "@/app/providers/query";
 
 export function generateStaticParams() {
   return languages.map(lng => ({ lng }));
 }
 
-export async function generateMetadata({}: { params: { lng: string } }) {
+export async function generateMetadata() {
   const { t } = await getT("seo");
 
   return {
@@ -36,7 +38,9 @@ export default async function RootLayout({
     <html lang={lng} className="dark" style={{ colorScheme: "dark" }}>
       <body className={"antialiased"} style={{ display: "flex" }}>
         <StyledJsxRegistry>
-          <GluestackUIProvider mode="system">{children}</GluestackUIProvider>
+          <GluestackUIProvider mode="system">
+            <QueryProvider>{children}</QueryProvider>
+          </GluestackUIProvider>
         </StyledJsxRegistry>
       </body>
     </html>
