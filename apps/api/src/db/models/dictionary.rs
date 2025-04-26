@@ -11,7 +11,7 @@ use crate::{
 
 use super::text::Text;
 
-#[derive(Queryable, Selectable, Insertable, Debug, Serialize)]
+#[derive(Queryable, Selectable, Insertable, Debug, Serialize, utoipa::ToSchema)]
 #[diesel(table_name = dictionaries)]
 pub struct Dictionary {
     pub id: Uuid,

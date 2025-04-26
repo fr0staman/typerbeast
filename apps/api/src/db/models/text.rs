@@ -9,7 +9,8 @@ use crate::{
     db::schema::texts,
 };
 
-#[derive(Queryable, Selectable, Insertable, Debug, Serialize)]
+// TODO: split to more usable structs
+#[derive(Queryable, Selectable, Insertable, Debug, Serialize, utoipa::ToSchema)]
 #[diesel(table_name = texts)]
 pub struct Text {
     pub id: Uuid,

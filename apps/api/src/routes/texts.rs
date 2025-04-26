@@ -8,11 +8,19 @@ use crate::{
     db::models::{dictionary::Dictionary, text::Text},
 };
 
-#[derive(Serialize)]
+#[derive(Serialize, utoipa::ToSchema)]
 pub struct GetTextsResponse {
     list: Vec<Text>,
 }
 
+#[utoipa::path(
+    get,
+    path = "/api/v1/texts",
+    responses(
+        (status = 200, description = "Success", body = GetTextsResponse),
+        (status = 401, description = "Unauthorized"),
+    )
+)]
 pub async fn get_texts(_: Claims, state: State<AppState>) -> MyResult<Json<GetTextsResponse>> {
     let mut conn = state.db().await?;
     let texts = Text::get_texts(&mut conn).await?;
@@ -22,13 +30,22 @@ pub async fn get_texts(_: Claims, state: State<AppState>) -> MyResult<Json<GetTe
     Ok(Json(res))
 }
 
-#[derive(Deserialize)]
+#[derive(Deserialize, utoipa::ToSchema)]
 pub struct AddTextRequest {
     dictionary_id: Uuid,
     title: String,
     content: String,
 }
 
+#[utoipa::path(
+    post,
+    path = "/api/v1/texts",
+    request_body = AddTextRequest,
+    responses(
+        (status = 200, description = "Success", body = Text),
+        (status = 401, description = "Unauthorized"),
+    )
+)]
 pub async fn insert_text(
     claims: Claims,
     state: State<AppState>,

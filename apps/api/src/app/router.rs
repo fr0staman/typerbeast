@@ -1,24 +1,27 @@
 use axum::{Json, Router, routing::*};
+use utoipa_axum::routes;
 
 use crate::{app::state::AppState, routes};
 
-pub fn build_router(state: AppState) -> Router<()> {
-    let base_router = Router::new()
-        .nest(
-            "/user",
-            Router::new()
-                .route("/login", post(routes::user::login))
-                .route("/signup", post(routes::user::signup))
-                .route("/profile", get(routes::user::profile)),
-        )
-        .route(
-            "/dictionaries",
-            get(routes::dictionaries::get_dictionaries).post(routes::dictionaries::add_dictionary),
-        )
-        .route("/dictionaries/{dict_id}/texts", get(routes::dictionaries::get_texts_in_dictionary))
-        .route("/texts", get(routes::texts::get_texts).post(routes::texts::insert_text));
+use super::openapi::OpenApiDoc;
 
-    Router::new().nest("/api/v1", base_router).fallback(fallback_404).with_state(state)
+pub fn build_router(state: AppState) -> Router<()> {
+    let (router, openapi) = OpenApiDoc::router()
+        .routes(routes!(routes::user::login))
+        .routes(routes!(routes::user::signup))
+        .routes(routes!(routes::user::profile))
+        .routes(routes!(
+            routes::dictionaries::get_dictionaries,
+            routes::dictionaries::add_dictionary
+        ))
+        .routes(routes!(routes::dictionaries::get_texts_in_dictionary))
+        .routes(routes!(routes::texts::get_texts, routes::texts::insert_text))
+        .split_for_parts();
+
+    router
+        .route("/api/v1/openapi.json", get(async || Json(openapi)))
+        .fallback(fallback_404)
+        .with_state(state)
 }
 
 async fn fallback_404() -> Json<serde_json::Value> {

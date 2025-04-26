@@ -29,18 +29,27 @@ use crate::{
     utils,
 };
 
-#[derive(Debug, Deserialize)]
+#[derive(Debug, Deserialize, utoipa::ToSchema)]
 pub struct LoginRequest {
     pub email: String,
     pub password: String,
 }
 
-#[derive(Debug, Serialize)]
+#[derive(Debug, Serialize, utoipa::ToSchema)]
 pub struct LoginResponse {
     pub access_token: String,
     pub token_type: String,
 }
 
+#[utoipa::path(
+    post,
+    path = "/api/v1/user/login",
+    request_body = LoginRequest,
+    responses(
+        (status = 200, description = "Login successful", body = LoginResponse),
+        (status = 401, description = "Unauthorized"),
+    )
+)]
 pub async fn login(
     jar: CookieJar,
     state: State<AppState>,
@@ -105,13 +114,21 @@ pub async fn login(
     Ok((jar.add(cookie), Json(res)))
 }
 
-#[derive(Serialize, Deserialize)]
+#[derive(Serialize, Deserialize, utoipa::ToSchema)]
 pub struct ProfileResponse {
     username: String,
     email: String,
     created_at: NaiveDateTime,
 }
 
+#[utoipa::path(
+    get,
+    path = "/api/v1/user/profile",
+    responses(
+        (status = 200, description = "Success", body = ProfileResponse),
+        (status = 401, description = "Unauthorized"),
+    )
+)]
 pub async fn profile(claims: Claims, state: State<AppState>) -> MyResult<Json<ProfileResponse>> {
     let mut conn = state.db().await?;
 
@@ -124,13 +141,21 @@ pub async fn profile(claims: Claims, state: State<AppState>) -> MyResult<Json<Pr
     Ok(Json(res))
 }
 
-#[derive(Deserialize)]
+#[derive(Deserialize, utoipa::ToSchema)]
 pub struct SignupRequest {
     pub email: String,
     pub password: String,
     pub username: String,
 }
 
+#[utoipa::path(
+    post,
+    path = "/api/v1/user/signup",
+    request_body = SignupRequest,
+    responses(
+        (status = 200, description = "Signup successful", body = LoginResponse),
+    )
+)]
 pub async fn signup(
     jar: CookieJar,
     state: State<AppState>,

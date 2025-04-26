@@ -11,11 +11,19 @@ use crate::{
     db::models::{dictionary::Dictionary, text::Text},
 };
 
-#[derive(Serialize)]
+#[derive(Serialize, utoipa::ToSchema)]
 pub struct GetDictionariesResponse {
     list: Vec<Dictionary>,
 }
 
+#[utoipa::path(
+    get,
+    path = "/api/v1/dictionaries",
+    responses(
+        (status = 200, description = "Success", body = GetDictionariesResponse),
+        (status = 401, description = "Unauthorized"),
+    )
+)]
 pub async fn get_dictionaries(
     _: Claims,
     state: State<AppState>,
@@ -28,11 +36,20 @@ pub async fn get_dictionaries(
     Ok(Json(res))
 }
 
-#[derive(Deserialize)]
+#[derive(Deserialize, utoipa::ToSchema)]
 pub struct AddDictionaryRequest {
     name: String,
 }
 
+#[utoipa::path(
+    post,
+    path = "/api/v1/dictionaries",
+    request_body = AddDictionaryRequest,
+    responses(
+        (status = 200, description = "Success", body = Dictionary),
+        (status = 401, description = "Unauthorized"),
+    )
+)]
 pub async fn add_dictionary(
     claims: Claims,
     state: State<AppState>,
@@ -53,11 +70,19 @@ pub async fn add_dictionary(
     Ok(Json(dictionary))
 }
 
-#[derive(Serialize)]
+#[derive(Serialize, utoipa::ToSchema)]
 pub struct GetTextsInDictionaryResponse {
     list: Vec<Text>,
 }
 
+#[utoipa::path(
+    get,
+    path = "/api/v1/dictionaries/{dict_id}/texts",
+    responses(
+        (status = 200, description = "Success", body = GetTextsInDictionaryResponse),
+        (status = 401, description = "Unauthorized"),
+    )
+)]
 pub async fn get_texts_in_dictionary(
     _: Claims,
     state: State<AppState>,
