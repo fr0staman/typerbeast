@@ -20,11 +20,11 @@ async fn main() {
 
     let ip = [0, 0, 0, 0];
     let port = 9999;
-
     let addr = SocketAddr::from((ip, port));
 
     let router = app::router::build_router(state.clone());
-    let service = router.into_make_service_with_connect_info::<SocketAddr>();
+    let app = app::middleware::apply_axum_middleware(state, router);
+    let service = app.into_make_service_with_connect_info::<SocketAddr>();
 
     let listener = tokio::net::TcpListener::bind(addr).await.unwrap();
 
