@@ -4,11 +4,6 @@
     "lint": "eslint ."
   },
   "dependencies": {
-    "@gluestack-ui/button": "^1.0.14",
-    "@gluestack-ui/icon": "^0.1.27",
-    "@gluestack-ui/overlay": "^0.1.22",
-    "@gluestack-ui/toast": "^1.0.9",
-    "@legendapp/motion": "^2.4.0",
     "@react-native-async-storage/async-storage": "^2.1.2",
     "@react-navigation/native": "^7.1.6",
     "@react-navigation/native-stack": "^7.3.10",
