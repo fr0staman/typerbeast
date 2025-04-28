@@ -1,0 +1,5 @@
+{
+  "createRoom": "Create room",
+  "roomDetails": "Room {{room_id}} — {{players}}",
+  "roomDetailsStarted": "Room {{room_id}} — {{players}} (Started)"
+}

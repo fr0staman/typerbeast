@@ -3,6 +3,7 @@ pub mod config;
 pub mod error;
 pub mod middleware;
 pub mod openapi;
+pub mod room;
 pub mod router;
 pub mod state;
 pub mod types;

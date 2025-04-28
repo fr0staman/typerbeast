@@ -18,7 +18,7 @@ import { useWebSocketGame } from "@/app/hooks/useWebSocketGame"; // Import custo
 import { useAppTranslation } from "@/app/i18n/hooks";
 
 export const TypingGame = () => {
-  const { text_id } = useParams<{ text_id: string }>();
+  const { room_id } = useParams<{ room_id: string }>();
 
   const {
     textToType,
@@ -29,7 +29,8 @@ export const TypingGame = () => {
     loading,
     countdown,
     sendKeystroke,
-  } = useWebSocketGame(text_id);
+    makeForceStart,
+  } = useWebSocketGame(room_id);
 
   const [userInput, setUserInput] = useState("");
   const inputRef = useRef<HTMLInputElement>(null);
@@ -49,7 +50,7 @@ export const TypingGame = () => {
   };
 
   const resetGame = () => {
-    router.replace(`/g/${text_id}`);
+    router.replace(`/rooms/${room_id}`);
   };
 
   const TextWithHighlight = useCallback(
@@ -76,6 +77,11 @@ export const TypingGame = () => {
     <Box className="flex-1 flex-col items-center justify-start p-6 min-h-screen">
       <Box className="flex w-full justify-between mb-4">
         <Text className="text-lg font-bold">typerbeast</Text>
+        {countdown === null && (
+          <Button onPress={() => makeForceStart(room_id)} className="mt-2">
+            <ButtonText>{t("start")}</ButtonText>
+          </Button>
+        )}
         {countdown !== null && (
           <Text className="text-lg text-blue-600">
             {t("startsIn", { countdown })}

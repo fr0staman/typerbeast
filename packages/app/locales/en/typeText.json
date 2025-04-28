@@ -7,5 +7,6 @@
   "mistakesWith": "Mistakes: {{mistakes}}",
   "speedWith": "Speed: {{speed}} $t(WPM)",
   "WPM": "WPM",
-  "finished": "🎉 Finished!"
+  "finished": "🎉 Finished!",
+  "start": "Force start"
 }

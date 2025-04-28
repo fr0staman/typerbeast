@@ -1,8 +1,13 @@
 import { useState, useEffect, useCallback } from "react";
 import { WEBSOCKET_API_URL } from "@/app/store/config";
+import { useRoomStart } from "./useRoomStart";
+
+// It's a mess. I know. For prototyping.
+// After some time I'll clean it up.
+// Currently, I need to do this ASAP.
 
 type WsMessage =
-  | { type: "Start"; text: string; start_after?: number }
+  | { type: "Start"; text: string; start_time: string }
   | { type: "Keystroke"; key: string; timestamp: number }
   | { type: "Update"; progress: number; mistakes: number; speed_wpm: number }
   | {
@@ -12,9 +17,11 @@ type WsMessage =
       accuracy: number;
       speed_wpm: number;
     }
+  | { type: "UserLeft"; user_id: string }
+  | { type: "UserFinished"; user_id: string }
   | { type: "Error"; message: string };
 
-export const useWebSocketGame = (text_id: string) => {
+export const useWebSocketGame = (room_id: string) => {
   const [socket, setSocket] = useState<WebSocket | null>(null);
   const [textToType, setTextToType] = useState("");
   const [progress, setProgress] = useState(0);
@@ -22,28 +29,30 @@ export const useWebSocketGame = (text_id: string) => {
   const [speed, setSpeed] = useState(0);
   const [finished, setFinished] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [startTime, setStartTime] = useState<Date | null>(null);
   const [countdown, setCountdown] = useState<number | null>(null);
+  const { mutateAsync: makeForceStart } = useRoomStart();
 
-  const startCountdown = useCallback((ms: number) => {
-    const seconds = Math.floor(ms / 1000);
-    setCountdown(seconds);
-
+  const startCountdown = useCallback(() => {
+    if (!startTime) return;
     const interval = setInterval(() => {
-      setCountdown(prev => {
-        if (prev === null) return null;
-        if (prev <= 1) {
-          clearInterval(interval);
-          setCountdown(null);
-          return null;
-        }
-        return prev - 1;
-      });
-    }, 1000);
-  }, []);
+      const now = new Date();
+      const diffMs = startTime.getTime() - now.getTime();
+      const secondsLeft = Math.max(Math.ceil(diffMs / 1000), 0);
+
+      setCountdown(secondsLeft);
+
+      if (secondsLeft <= 0) {
+        clearInterval(interval);
+        setCountdown(null);
+        return null;
+      }
+    }, 100);
+  }, [startTime]);
 
   useEffect(() => {
-    if (!text_id) return;
-    const url = `${WEBSOCKET_API_URL}/ws/${text_id}`;
+    if (!room_id) return;
+    const url = `${WEBSOCKET_API_URL}/ws/room/${room_id}`;
     const ws = new WebSocket(url);
 
     ws.onopen = () => console.log("[WebSocket] Connected");
@@ -59,9 +68,7 @@ export const useWebSocketGame = (text_id: string) => {
           case "Start":
             setTextToType(message.text);
             setLoading(false);
-            if (message.start_after) {
-              startCountdown(message.start_after);
-            }
+            setStartTime(new Date(message.start_time));
             break;
           case "Update":
             setProgress(message.progress);
@@ -86,7 +93,13 @@ export const useWebSocketGame = (text_id: string) => {
     return () => {
       ws.close();
     };
-  }, [text_id, startCountdown]);
+  }, [room_id]);
+
+  useEffect(() => {
+    if (!startTime) return;
+
+    startCountdown();
+  }, [startTime, startCountdown]);
 
   const sendKeystroke = useCallback(
     (key: string) => {
@@ -111,6 +124,7 @@ export const useWebSocketGame = (text_id: string) => {
     finished,
     loading,
     countdown,
+    makeForceStart,
     sendKeystroke,
   };
 };

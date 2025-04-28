@@ -55,7 +55,7 @@ export const HomeScreen = () => {
 
   const toTextLinkProps = useLink({
     // Hardcoded text_id. In future this should be changes to room_id, that's normal for prototyping.
-    href: `/g/36a781f8-fad5-4941-9a88-4310c7b4fc31`,
+    href: `/rooms`,
   });
 
   const platformMessage =
@@ -83,7 +83,7 @@ export const HomeScreen = () => {
             <ButtonText>{t("linkToUser", { id: CHOSEN_USER })}</ButtonText>
           </Button>
           <Button className="mt-6" {...toTextLinkProps}>
-            <ButtonText>{t("linkToText", { id: 1 })}</ButtonText>
+            <ButtonText>{t("linkToText")}</ButtonText>
           </Button>
         </View>
       </View>

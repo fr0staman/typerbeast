@@ -1,0 +1,5 @@
+{
+  "createRoom": "Створити кімнату",
+  "roomDetails": "Кімната {{room_id}} — {{players}}",
+  "roomDetailsStarted": "Room {{room_id}} — {{players}} (Почато)"
+}
