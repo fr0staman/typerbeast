@@ -2,6 +2,7 @@
   "welcome": "Welcome to TyperBeast 👾",
   "username": "Username",
   "linkToUser": "Link to user {{id}}",
+  "linkToText": "Link to text {{id}}",
   "startTyping": "Start typing",
   "toastTitle": "Hello! This it Toast!",
   "toastDescription": "Just showing how toast works...",

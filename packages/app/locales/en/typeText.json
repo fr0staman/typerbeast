@@ -1,0 +1,11 @@
+{
+  "restart": "Restart",
+  "startsIn": "Starts in {{countdown}}",
+  "waitingForText": "Waiting for text",
+  "startTyping": "Start typing",
+  "progressWith": "Progress: {{progress}}%",
+  "mistakesWith": "Mistakes: {{mistakes}}",
+  "speedWith": "Speed: {{speed}} $t(WPM)",
+  "WPM": "WPM",
+  "finished": "🎉 Finished!"
+}

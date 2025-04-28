@@ -48,6 +48,7 @@ const nextConfig: NextConfig = {
     "@gluestack-ui",
   ],
   compress: false,
+  reactStrictMode: false,
 };
 
 export default nextConfig;

@@ -1,9 +1,10 @@
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import { HomeScreen } from "@/app/features/Home";
 import { UserScreen } from "@/app/features/User";
+import { TypingGame } from "@/app/features/TypeText";
 import { useAppTranslation } from "@/app/i18n/hooks";
 import { LoginScreen } from "@/app/features/LoginScreen";
-import { useSession } from "../hooks/useSession";
+import { useSession } from "@/app/hooks/useSession";
 import { ActivityIndicator, View } from "react-native";
 
 const Stack = createNativeStackNavigator<{
@@ -11,6 +12,9 @@ const Stack = createNativeStackNavigator<{
   home: undefined;
   user: {
     username: string;
+  };
+  g: {
+    text_id: string;
   };
 }>();
 
@@ -50,6 +54,13 @@ export function MainNavigator() {
         options={props => ({
           title: t("user.title", { id: props.route.params.username }),
         })}
+      />
+      <Stack.Screen
+        name="g"
+        component={TypingGame}
+        options={{
+          headerShown: false,
+        }}
       />
     </Stack.Navigator>
   );

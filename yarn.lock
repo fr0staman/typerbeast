@@ -1699,6 +1699,18 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@gluestack-ui/progress@npm:^0.1.18":
+  version: 0.1.18
+  resolution: "@gluestack-ui/progress@npm:0.1.18"
+  dependencies:
+    "@gluestack-ui/utils": "npm:^0.1.14"
+  peerDependencies:
+    react: ">=16"
+    react-dom: ">=16"
+  checksum: 10c0/a4ea17170c1cdef99f5aa69960a355d335c100f22799bcb140a384704a929e1c125059146eb1d09595fc7ac082cba2f69380b24d3bb190337b0521f1ee5ed44f
+  languageName: node
+  linkType: hard
+
 "@gluestack-ui/provider@npm:^0.1.19":
   version: 0.1.19
   resolution: "@gluestack-ui/provider@npm:0.1.19"
@@ -3858,11 +3870,6 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "app@workspace:packages/app"
   dependencies:
-    "@gluestack-ui/button": "npm:^1.0.14"
-    "@gluestack-ui/icon": "npm:^0.1.27"
-    "@gluestack-ui/overlay": "npm:^0.1.22"
-    "@gluestack-ui/toast": "npm:^1.0.9"
-    "@legendapp/motion": "npm:^2.4.0"
     "@react-native-async-storage/async-storage": "npm:^2.1.2"
     "@react-navigation/native": "npm:^7.1.6"
     "@react-navigation/native-stack": "npm:^7.3.10"
@@ -11372,6 +11379,7 @@ __metadata:
     "@gluestack-ui/icon": "npm:^0.1.27"
     "@gluestack-ui/input": "npm:^0.1.38"
     "@gluestack-ui/overlay": "npm:^0.1.22"
+    "@gluestack-ui/progress": "npm:^0.1.18"
     "@gluestack-ui/toast": "npm:^1.0.9"
     "@legendapp/motion": "npm:^2.4.0"
     autoprefixer: "npm:^10.4.21"

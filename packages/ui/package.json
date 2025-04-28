@@ -9,6 +9,7 @@
     "@gluestack-ui/icon": "^0.1.27",
     "@gluestack-ui/input": "^0.1.38",
     "@gluestack-ui/overlay": "^0.1.22",
+    "@gluestack-ui/progress": "^0.1.18",
     "@gluestack-ui/toast": "^1.0.9",
     "@legendapp/motion": "^2.4.0",
     "autoprefixer": "^10.4.21",

@@ -1,0 +1,11 @@
+{
+  "restart": "Рестарт",
+  "startsIn": "Починається через {{countdown}}",
+  "waitingForText": "Чекаємо на текст",
+  "startTyping": "Починайте набирати",
+  "progressWith": "Прогрес: {{progress}}%",
+  "mistakesWith": "Помилки: {{mistakes}}",
+  "speedWith": "Швидкість: {{speed}} $t(WPM)",
+  "WPM": "WPM",
+  "finished": "🎉 Завершено!"
+}

@@ -16,6 +16,7 @@ pub fn build_router(state: AppState) -> Router<()> {
         ))
         .routes(routes!(routes::dictionaries::get_texts_in_dictionary))
         .routes(routes!(routes::texts::get_texts, routes::texts::insert_text))
+        .routes(routes!(routes::ws::ws_handler))
         .split_for_parts();
 
     router

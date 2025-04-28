@@ -5,7 +5,7 @@ edition = "2024"
 
 [dependencies]
 argon2 = { version = "0.5.3", features = ["alloc", "password-hash"] }
-axum = { version = "0.8.3", features = ["macros"] }
+axum = { version = "0.8.3", features = ["macros", "ws"] }
 axum-extra = { version = "0.10.1", features = ["typed-header", "cookie"] }
 chrono = { version = "0.4.40", default-features = false, features = ["now", "serde"] }
 config = { version = "0.15.11", default-features = false }
@@ -13,6 +13,7 @@ deadpool-runtime = { version = "0.1.4", features = ["tokio_1"] }
 diesel = { version = "2.2.9", features = ["chrono", "uuid", "network-address"] }
 diesel-async = { version = "0.5.2", features = ["postgres", "deadpool"] }
 dotenvy = "0.15.7"
+futures = { version = "0.3.31", default-features = false }
 ipnetwork = "0.21.1"
 jsonwebtoken = { version = "9.3.1", default-features = false }
 log = "0.4.27"

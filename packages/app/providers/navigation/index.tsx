@@ -26,6 +26,7 @@ export const AppNavContainer = ({
               login: "login",
               home: "",
               user: "user/:username",
+              g: "g/:text_id",
             },
           },
         }),
