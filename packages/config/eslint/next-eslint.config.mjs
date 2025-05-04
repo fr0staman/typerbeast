@@ -12,6 +12,7 @@ const eslintConfig = [
       ...nextPlugin.configs["core-web-vitals"].rules,
     },
   },
+  { ignores: [".next"] },
   ...standardEslint,
 ];
 
