@@ -24,6 +24,7 @@ export const AppNavContainer = ({
             initialRouteName: "login",
             screens: {
               login: "login",
+              signup: "signup",
               home: "",
               user: "user/:username",
               g: "g/:text_id",

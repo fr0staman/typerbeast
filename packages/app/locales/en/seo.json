@@ -10,5 +10,9 @@
   "login": {
     "title": "Login",
     "description": "Welcome back!"
+  },
+  "signup": {
+    "title": "Sign Up",
+    "description": "Simply sign up in Typerbeast to get a new typing experience."
   }
 }

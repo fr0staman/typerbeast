@@ -6,9 +6,11 @@ import { useAppTranslation } from "@/app/i18n/hooks";
 import { LoginScreen } from "@/app/features/LoginScreen";
 import { useSession } from "@/app/hooks/useSession";
 import { ActivityIndicator, View } from "react-native";
+import { SignupScreen } from "@/app/features/SignupScreen";
 
 const Stack = createNativeStackNavigator<{
   login: undefined;
+  signup: undefined;
   home: undefined;
   user: {
     username: string;
@@ -68,14 +70,9 @@ export function MainNavigator() {
 
 export function AuthNavigator() {
   return (
-    <Stack.Navigator>
-      <Stack.Screen
-        name="login"
-        component={LoginScreen}
-        options={{
-          headerShown: false,
-        }}
-      />
+    <Stack.Navigator screenOptions={{ headerShown: false }}>
+      <Stack.Screen name="login" component={LoginScreen} />
+      <Stack.Screen name="signup" component={SignupScreen} />
     </Stack.Navigator>
   );
 }

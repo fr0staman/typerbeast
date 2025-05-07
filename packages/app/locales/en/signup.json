@@ -1,0 +1,9 @@
+{
+  "register": "Register",
+  "signup": "Sign up",
+  "placeholder": {
+    "email": "Email",
+    "username": "Username",
+    "password": "Password"
+  }
+}

@@ -1,0 +1,9 @@
+{
+  "register": "Реєстрація",
+  "signup": "Зареєструватись",
+  "placeholder": {
+    "email": "Ел. пошта",
+    "username": "Юзернейм",
+    "password": "Пароль"
+  }
+}
