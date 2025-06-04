@@ -7,18 +7,16 @@
 
 ## 🧠 About
 
-**typerbeast** is a hybrid multiplayer typing game built for both **web** and **mobile** users — compete head-to-head in typing races, climb league ladders, and improve your speed across platforms.
-
-It’s more than just a typing test — Typerbeast is a **competitive playground** where performance meets progression. Players earn ranks, track stats, and face real-time challenges in different leagues whether on the **Next.js web app** or the **React Native mobile app**.
+**typerbeast** is a hybrid cross-platform multiplayer typing game built for both **web** and **mobile** users — compete head-to-head in typing races, climb league ladders, and improve your speed across devices.
 
 ---
 
-### 🔥 Key Features
-
-- 🧍 Cross-platform: Web + Mobile
-- ⚔️ Leagues & Rankings: Compete against others in your tier
-- 📈 Real-time Progress: Improve WPM, accuracy, and speed
-
+🚀 Features
+- 💻📱 Cross-Platform: Web + Mobile (Android/iOS)
+- ⚔️ Competitive Leagues: Engage in tiered competitions and climb the rankings.
+- 📈 Real-Time Progress Tracking: Monitor your Words Per Minute (WPM), accuracy, and overall performance.
+- 🧍 Multiplayer Races: Challenge friends or random opponents in live typing battles.
+- 👤 User Profiles: Track your stats, achievements, and progression over time.
 ---
 
 Whether you're looking to level up your typing skills or climb the leaderboard with friends, **typerbeast** gives you the tools and challenge to do both — in a fast, modern, competitive experience.
@@ -28,7 +26,7 @@ Whether you're looking to level up your typing skills or climb the leaderboard w
 
 | Layer        | Tech                          |
 |--------------|-------------------------------|
-| Web          | [Next.js](https://nextjs.org) |
+| Web          | [TypeScript](https://www.typescriptlang.org) + [Next.js](https://nextjs.org) |
 | Mobile       | [React Native CLI](https://reactnative.dev) |
 | API / Backend| [Rust](https://www.rust-lang.org) + [Axum](https://github.com/tokio-rs/axum) + [Diesel](https://diesel.rs) |
 | Monorepo     | [Turborepo](https://turbo.build) |
