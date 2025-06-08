@@ -116,6 +116,7 @@ pub async fn login(
 
 #[derive(Serialize, Deserialize, utoipa::ToSchema)]
 pub struct ProfileResponse {
+    id: Uuid,
     username: String,
     email: String,
     created_at: NaiveDateTime,
@@ -135,8 +136,12 @@ pub async fn profile(claims: Claims, state: State<AppState>) -> MyResult<Json<Pr
     let maybe_user = User::get_user(&mut conn, claims.sub).await?;
     let Some(user) = maybe_user else { return Err(MyError::InternalError) };
 
-    let res =
-        ProfileResponse { username: user.username, email: user.email, created_at: user.created_at };
+    let res = ProfileResponse {
+        username: user.username,
+        email: user.email,
+        created_at: user.created_at,
+        id: user.id,
+    };
 
     Ok(Json(res))
 }

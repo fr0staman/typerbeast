@@ -16,9 +16,11 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { useParams, useRouter } from "solito/navigation";
 import { useWebSocketGame } from "@/app/hooks/useWebSocketGame"; // Import custom hook
 import { useAppTranslation } from "@/app/i18n/hooks";
+import { useSession } from "@/app/hooks/useSession";
 
 export const TypingGame = () => {
   const { room_id } = useParams<{ room_id: string }>();
+  const { data } = useSession();
 
   const {
     textToType,
@@ -30,6 +32,7 @@ export const TypingGame = () => {
     countdown,
     sendKeystroke,
     makeForceStart,
+    players,
   } = useWebSocketGame(room_id);
 
   const [userInput, setUserInput] = useState("");
@@ -76,7 +79,6 @@ export const TypingGame = () => {
   return (
     <Box className="flex-1 flex-col items-center justify-start p-6">
       <Box className="flex w-full justify-between mb-4">
-        <Text className="text-lg font-bold">typerbeast</Text>
         {countdown === null && (
           <Button onPress={() => makeForceStart(room_id)} className="mt-2">
             <ButtonText>{t("start")}</ButtonText>
@@ -117,6 +119,17 @@ export const TypingGame = () => {
         <Progress value={progress} size="md" className="w-full mt-4">
           <ProgressFilledTrack />
         </Progress>
+        <Box>
+          {players.map(player => (
+            <Text key={player.id} className="text-center">
+              {player.id}:{" "}
+              {data?.id === player.id
+                ? progress.toFixed(1)
+                : player.progress.toFixed(1)}
+              %
+            </Text>
+          ))}
+        </Box>
         <Text className="mt-2 text-center">
           {t("progressWith", { progress: progress.toFixed(1) })}
         </Text>

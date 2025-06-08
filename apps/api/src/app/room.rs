@@ -17,7 +17,25 @@ pub enum WsMessage {
     Finished { total_time_ms: u64, mistakes: u32, accuracy: f32, speed_wpm: f32 },
     UserLeft { user_id: Uuid },
     UserFinished { user_id: Uuid },
+    RoomUpdate { users: Vec<PlayerStats> },
     Error { message: String },
+}
+
+#[derive(Serialize, Deserialize, Clone, Debug, utoipa::ToSchema)]
+pub enum PlayerStatus {
+    Idle,
+    Started,
+    Dropped,
+    Finished,
+    Spectator,
+}
+
+#[derive(Serialize, Deserialize, Debug)]
+pub struct PlayerStats {
+    pub id: Uuid,
+    pub mistakes: u32,
+    pub progress: f32,
+    pub status: PlayerStatus,
 }
 
 #[derive(Debug, Clone, Serialize, utoipa::ToSchema)]
@@ -46,7 +64,9 @@ pub struct Player {
     pub typed_text: String,
     pub mistakes: u32,
     pub last_is_mistake: bool,
-    pub finished: bool,
+    pub progress: f32,
+    pub status: PlayerStatus,
+    pub connected: bool,
 }
 
 #[derive(Clone)]
@@ -71,7 +91,44 @@ impl RoomsManager {
             start_time: chrono::Utc::now(),
             start_notifier,
         };
-        self.rooms.write().await.insert(id, Arc::new(RwLock::new(room)));
+
+        let locked_room = Arc::new(RwLock::new(room));
+
+        self.rooms.write().await.insert(id, locked_room);
+
+        let rooms = self.rooms.clone();
+        tokio::spawn(async move {
+            loop {
+                tokio::time::sleep(tokio::time::Duration::from_secs(3)).await;
+
+                let rooms = rooms.read().await;
+                let room = match rooms.get(&id) {
+                    Some(room) => room.read().await,
+                    None => {
+                        log::debug!("Room {} destroyed, task also.", &id);
+                        break;
+                    },
+                };
+
+                if !room.started {
+                    continue;
+                }
+
+                let stats = room
+                    .players
+                    .iter()
+                    .map(|(k, v)| PlayerStats {
+                        id: *k,
+                        mistakes: v.mistakes,
+                        progress: v.progress,
+                        status: v.status.clone(),
+                    })
+                    .collect();
+
+                room.broadcast_message(&WsMessage::RoomUpdate { users: stats }).await;
+            }
+        });
+
         id
     }
 
@@ -105,12 +162,28 @@ impl RoomsManager {
             Player {
                 id: player_id,
                 sender,
-                finished: false,
+                status: PlayerStatus::Idle,
                 typed_text: String::new(),
                 mistakes: 0,
                 last_is_mistake: false,
+                progress: 0.0,
+                connected: true,
             },
         );
+
+        let users = room
+            .players
+            .iter()
+            .map(|(id, player)| PlayerStats {
+                id: *id,
+                mistakes: player.mistakes,
+                progress: player.progress,
+                status: player.status.clone(),
+            })
+            .collect();
+
+        room.broadcast_message(&WsMessage::RoomUpdate { users }).await;
+
         log::debug!("Inserted to room {}", room_id);
 
         Ok(())
@@ -120,12 +193,18 @@ impl RoomsManager {
         let mut to_delete = false;
         if let Some(room) = self.rooms.read().await.get(&room_id) {
             let mut room = room.write().await;
-            room.players.remove(&player_id);
+            let player = match room.players.get_mut(&player_id) {
+                Some(player) => player,
+                None => return,
+            };
 
-            if room.players.is_empty() {
+            player.connected = false;
+
+            if !room.players.iter().all(|p| p.1.connected) {
                 // Try to avoid long locks
                 to_delete = true;
             }
+
             // Notify others
             let message = WsMessage::UserLeft { user_id: player_id };
             room.broadcast_message(&message).await;
@@ -226,13 +305,19 @@ impl RoomsManager {
                     }
                 }
 
-                let p = p.clone();
-                // We don't need any writes - we can downgrade.
-                let room = room.downgrade();
                 let typed_count = p.typed_text.chars().count() as u32;
                 let expected_count = text_to_type.chars().count() as u32;
                 // Send Update message
-                let progress = (typed_count as f32 / expected_count as f32) * 100.0;
+                let progress = 100.0 / (expected_count as f32 / typed_count as f32);
+                p.progress = progress;
+
+                // TODO: make locks more non-blocking
+                if p.typed_text == text_to_type {
+                    p.status = PlayerStatus::Finished;
+                }
+                let p = p.clone();
+                // We don't need any writes - we can downgrade.
+                let room = room.downgrade();
 
                 let now = chrono::Utc::now();
                 let elapsed_secs = (now - start_time).num_seconds() as f32;
@@ -240,11 +325,7 @@ impl RoomsManager {
                 let speed_wpm =
                     if elapsed_secs > 0.0 { (words_typed / elapsed_secs) * 60.0 } else { 0.0 };
 
-                let update_msg = WsMessage::Update {
-                    progress: progress.min(100.0),
-                    mistakes: p.mistakes,
-                    speed_wpm,
-                };
+                let update_msg = WsMessage::Update { progress, mistakes: p.mistakes, speed_wpm };
                 // TODO: check if success
                 room.send_message_to_player(user_id, &update_msg).await;
 
@@ -263,6 +344,20 @@ impl RoomsManager {
                         speed_wpm,
                     };
                     let _ = room.send_message_to_player(user_id, &finished_msg).await;
+
+                    let users = room
+                        .players
+                        .iter()
+                        .map(|(id, player)| PlayerStats {
+                            id: *id,
+                            mistakes: player.mistakes,
+                            status: player.status.clone(),
+                            progress: player.progress,
+                        })
+                        .collect();
+
+                    room.broadcast_message(&WsMessage::RoomUpdate { users }).await;
+
                     log::debug!("User finished typing!");
                 }
             },
