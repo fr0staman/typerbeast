@@ -13,3 +13,7 @@ export { Heading } from "./Heading";
 export { Input, InputField, InputIcon, InputSlot } from "./Input";
 export { Progress, ProgressFilledTrack } from "./Progress";
 export { Skeleton, SkeletonText } from "./Skeleton";
+export { Image } from "./Image";
+export { Pressable } from "./Pressable";
+export { HStack } from "./HStack";
+export { Link, LinkText } from "./Link";

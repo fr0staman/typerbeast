@@ -8,6 +8,8 @@ import { GluestackUIProvider } from "@/ui/providers/gluestack";
 import { getT } from "../../i18n/server";
 import { Language, languages } from "@/app/i18n/settings";
 import { QueryProvider } from "@/app/providers/query";
+import { Header } from "@/app/features/Header";
+import { Box } from "@/ui/components";
 
 export function generateStaticParams() {
   return languages.map(lng => ({ lng }));
@@ -36,10 +38,15 @@ export default async function RootLayout({
 
   return (
     <html lang={lng} className="dark" style={{ colorScheme: "dark" }}>
-      <body className={"antialiased"} style={{ display: "flex" }}>
+      <body className={"antialiased dark:bg-black"}>
         <StyledJsxRegistry>
           <GluestackUIProvider mode="system">
-            <QueryProvider>{children}</QueryProvider>
+            <QueryProvider>
+              <Box className="flex max-w-full min-h-screen dark:bg-black">
+                <Header />
+                {children}
+              </Box>
+            </QueryProvider>
           </GluestackUIProvider>
         </StyledJsxRegistry>
       </body>

@@ -1656,6 +1656,20 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@gluestack-ui/image@npm:^0.1.17":
+  version: 0.1.17
+  resolution: "@gluestack-ui/image@npm:0.1.17"
+  dependencies:
+    "@gluestack-ui/utils": "npm:^0.1.15"
+    "@react-native-aria/focus": "npm:^0.2.9"
+    "@react-native-aria/interactions": "npm:0.2.16"
+  peerDependencies:
+    react: ">=16"
+    react-dom: ">=16"
+  checksum: 10c0/a20ae98f6214cdb89d49f5dba59de6cdc891dd72febf1326f982cd02acc02f78b161dcde132b7f4410d1ac3843683d661abd5db2e72df7c909b68a9cb73a6e79
+  languageName: node
+  linkType: hard
+
 "@gluestack-ui/input@npm:^0.1.38":
   version: 0.1.38
   resolution: "@gluestack-ui/input@npm:0.1.38"
@@ -1668,6 +1682,20 @@ __metadata:
     react: ">=16"
     react-dom: ">=16"
   checksum: 10c0/cd8bb092aa6d223b85f4dd5dc64433d83b7bd85376030ad750830879fd3f76b0dc9b93cc1915a9e83b47d8a38e3faf788f1c0dbc9eeffeb63e8010d5d2788bdf
+  languageName: node
+  linkType: hard
+
+"@gluestack-ui/link@npm:^0.1.29":
+  version: 0.1.29
+  resolution: "@gluestack-ui/link@npm:0.1.29"
+  dependencies:
+    "@gluestack-ui/utils": "npm:^0.1.15"
+    "@react-native-aria/focus": "npm:^0.2.9"
+    "@react-native-aria/interactions": "npm:0.2.16"
+  peerDependencies:
+    react: ">=16"
+    react-dom: ">=16"
+  checksum: 10c0/16547665ebf7b3bd8125181b8d6406765cf91e868c84ea4c7053a19d251ba1025ef62fe1d16b6eb9579786e2658db9d3eb21d6a7d3c693c22d46b6760cdcac44
   languageName: node
   linkType: hard
 
@@ -1696,6 +1724,20 @@ __metadata:
     react: ">=16"
     react-dom: ">=16"
   checksum: 10c0/a2c80d395de37250729e2510c51a4d7d7b310b49fd197de6a2ac284d0acbd966df80a10a17167317f3c7e31da33a3813c0330758f19e89b9f5ad1b7d1f059845
+  languageName: node
+  linkType: hard
+
+"@gluestack-ui/pressable@npm:^0.1.23":
+  version: 0.1.23
+  resolution: "@gluestack-ui/pressable@npm:0.1.23"
+  dependencies:
+    "@gluestack-ui/utils": "npm:^0.1.15"
+    "@react-native-aria/focus": "npm:^0.2.9"
+    "@react-native-aria/interactions": "npm:0.2.16"
+  peerDependencies:
+    react: ">=16"
+    react-dom: ">=16"
+  checksum: 10c0/93690cf9814b949f31707feb19b77a4f2d0694dd2596d9f105d9cd10b39e000d5efc1933ae71015f4f58227f9003ff740ff7f432abc3752f09944824bba9d337
   languageName: node
   linkType: hard
 
@@ -11377,8 +11419,11 @@ __metadata:
     "@expo/html-elements": "npm:^0.11.2"
     "@gluestack-ui/button": "npm:^1.0.14"
     "@gluestack-ui/icon": "npm:^0.1.27"
+    "@gluestack-ui/image": "npm:^0.1.17"
     "@gluestack-ui/input": "npm:^0.1.38"
+    "@gluestack-ui/link": "npm:^0.1.29"
     "@gluestack-ui/overlay": "npm:^0.1.22"
+    "@gluestack-ui/pressable": "npm:^0.1.23"
     "@gluestack-ui/progress": "npm:^0.1.18"
     "@gluestack-ui/toast": "npm:^1.0.9"
     "@legendapp/motion": "npm:^2.4.0"

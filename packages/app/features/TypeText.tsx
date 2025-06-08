@@ -74,7 +74,7 @@ export const TypingGame = () => {
   );
 
   return (
-    <Box className="flex-1 flex-col items-center justify-start p-6 min-h-screen">
+    <Box className="flex-1 flex-col items-center justify-start p-6">
       <Box className="flex w-full justify-between mb-4">
         <Text className="text-lg font-bold">typerbeast</Text>
         {countdown === null && (

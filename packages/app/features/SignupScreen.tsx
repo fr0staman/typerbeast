@@ -40,7 +40,7 @@ export function SignupScreen() {
   return (
     <View
       className={
-        "flex-1 min-h-screen items-center justify-items-center p-8 pb-20 gap-16 sm:p-20 bg-white dark:bg-black"
+        "flex-1 items-center justify-items-center p-8 pb-20 gap-16 sm:p-20 bg-white dark:bg-black"
       }
     >
       <Box className="flex-1 justify-center align-center px-4">
