@@ -396,6 +396,7 @@ dependencies = [
  "ipnetwork",
  "itoa",
  "libc",
+ "serde_json",
  "uuid",
 ]
 

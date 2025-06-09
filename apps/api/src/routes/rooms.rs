@@ -95,7 +95,7 @@ pub async fn create_room(
         return Err(MyError::NotFound);
     };
 
-    let room_id = state.rooms_manager.create_room(text.content).await;
+    let room_id = state.rooms_manager.create_room(text).await;
 
     let res = CreateRoomResponse { room_id };
 

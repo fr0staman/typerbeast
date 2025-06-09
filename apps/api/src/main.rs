@@ -16,7 +16,7 @@ async fn main() {
 
     let pool = db::init::init_pool(config.database_url.clone());
 
-    let rooms_manager = app::room::RoomsManager::new();
+    let rooms_manager = app::room::RoomsManager::new(pool.clone());
     let state = AppState { pool, rooms_manager };
 
     let ip = [0, 0, 0, 0];

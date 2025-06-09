@@ -10,7 +10,7 @@ use crate::{
 };
 
 // TODO: split to more usable structs
-#[derive(Queryable, Selectable, Insertable, Debug, Serialize, utoipa::ToSchema)]
+#[derive(Queryable, Selectable, Insertable, Debug, Serialize, Clone, utoipa::ToSchema)]
 #[diesel(table_name = texts)]
 pub struct Text {
     pub id: Uuid,

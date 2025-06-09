@@ -10,6 +10,20 @@ diesel::table! {
 }
 
 diesel::table! {
+    results (id) {
+        id -> Uuid,
+        text_id -> Uuid,
+        user_id -> Uuid,
+        start_time -> Timestamp,
+        end_time -> Timestamp,
+        mistakes -> Int2,
+        wpm -> Float4,
+        cpm -> Float4,
+        stats -> Jsonb,
+    }
+}
+
+diesel::table! {
     sessions (id) {
         id -> Uuid,
         user_id -> Uuid,
@@ -44,11 +58,14 @@ diesel::table! {
 }
 
 diesel::joinable!(dictionaries -> users (user_id));
+diesel::joinable!(results -> texts (text_id));
+diesel::joinable!(results -> users (user_id));
 diesel::joinable!(sessions -> users (user_id));
 diesel::joinable!(texts -> dictionaries (dictionary_id));
 
 diesel::allow_tables_to_appear_in_same_query!(
     dictionaries,
+    results,
     sessions,
     texts,
     users,

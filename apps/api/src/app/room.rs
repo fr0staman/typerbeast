@@ -6,6 +6,14 @@ use serde::{Deserialize, Serialize};
 use tokio::sync::{RwLock, mpsc::UnboundedSender, watch};
 use uuid::Uuid;
 
+use crate::{
+    app::types::DbPool,
+    db::models::{
+        result::{Keystroke, ResultStats, Results},
+        text::Text,
+    },
+};
+
 use super::{error::MyError, types::MyResult};
 
 #[derive(Serialize, Deserialize, Debug)]
@@ -13,8 +21,8 @@ use super::{error::MyError, types::MyResult};
 pub enum WsMessage {
     Start { text: String, start_time: DateTime<Utc> },
     Keystroke { key: String, timestamp: u64 },
-    Update { progress: f32, mistakes: u32, speed_wpm: f32 },
-    Finished { total_time_ms: u64, mistakes: u32, accuracy: f32, speed_wpm: f32 },
+    Update { progress: f32, mistakes: i16, speed_wpm: f32 },
+    Finished { total_time_ms: u64, mistakes: i16, accuracy: f32, speed_wpm: f32 },
     UserLeft { user_id: Uuid },
     UserFinished { user_id: Uuid },
     RoomUpdate { users: Vec<PlayerStats> },
@@ -33,7 +41,7 @@ pub enum PlayerStatus {
 #[derive(Serialize, Deserialize, Debug)]
 pub struct PlayerStats {
     pub id: Uuid,
-    pub mistakes: u32,
+    pub mistakes: i16,
     pub progress: f32,
     pub status: PlayerStatus,
 }
@@ -45,10 +53,10 @@ pub struct RoomStats {
     pub started: bool,
 }
 
-#[derive(Debug, Clone, Serialize, utoipa::ToSchema)]
+#[derive(Debug, Clone, Serialize)]
 pub struct Room {
     pub id: Uuid,
-    pub text_to_type: String,
+    pub text: Text,
     pub players: HashMap<Uuid, Player>,
     pub started: bool,
     pub start_time: DateTime<Utc>,
@@ -56,36 +64,38 @@ pub struct Room {
     pub start_notifier: watch::Sender<bool>,
 }
 
-#[derive(Clone, Serialize, Debug, utoipa::ToSchema)]
+#[derive(Clone, Serialize, Debug)]
 pub struct Player {
     pub id: Uuid,
     #[serde(skip_deserializing, skip_serializing)]
     pub sender: UnboundedSender<Message>, // axum::extract::ws::WebSocketSender,
     pub typed_text: String,
-    pub mistakes: u32,
+    pub mistakes: i16,
     pub last_is_mistake: bool,
     pub progress: f32,
     pub status: PlayerStatus,
     pub connected: bool,
+    pub stats: ResultStats,
 }
 
 #[derive(Clone)]
 pub struct RoomsManager {
+    pub db: DbPool,
     pub rooms: Arc<RwLock<HashMap<Uuid, Arc<RwLock<Room>>>>>,
 }
 
 impl RoomsManager {
-    pub fn new() -> Self {
-        Self { rooms: Arc::new(RwLock::new(HashMap::new())) }
+    pub fn new(db: DbPool) -> Self {
+        Self { db, rooms: Arc::new(RwLock::new(HashMap::new())) }
     }
 
-    pub async fn create_room(&self, text: String) -> Uuid {
+    pub async fn create_room(&self, text: Text) -> Uuid {
         let (start_notifier, _) = watch::channel(false);
         let id = Uuid::new_v4();
 
         let room = Room {
             id,
-            text_to_type: text,
+            text,
             players: HashMap::new(),
             started: false,
             start_time: chrono::Utc::now(),
@@ -168,6 +178,7 @@ impl RoomsManager {
                 last_is_mistake: false,
                 progress: 0.0,
                 connected: true,
+                stats: ResultStats { keystrokes: vec![] },
             },
         );
 
@@ -242,7 +253,7 @@ impl RoomsManager {
         let rooms = self.rooms.read().await;
         let room = rooms.get(&room_id).unwrap().read().await;
         let start_time = Utc::now() + Duration::seconds(10);
-        let start_msg = WsMessage::Start { text: room.text_to_type.clone(), start_time };
+        let start_msg = WsMessage::Start { text: room.text.content.clone(), start_time };
 
         drop(room);
         let rooms = self.rooms.read().await;
@@ -277,7 +288,7 @@ impl RoomsManager {
 
                 let mut room = room.write().await;
                 let start_time = room.start_time;
-                let text_to_type = room.text_to_type.clone();
+                let text_to_type = room.text.content.clone();
                 let Some(p) = room.players.get_mut(&user_id) else {
                     log::debug!("player not exist, how?");
                     return;
@@ -290,18 +301,38 @@ impl RoomsManager {
                     if key == expected.to_string() {
                         p.typed_text.push_str(&key);
                         p.last_is_mistake = false;
+                        p.stats.keystrokes.push(Keystroke {
+                            key,
+                            mistake: false,
+                            expected: None,
+                            timestamp: chrono::Utc::now().naive_utc(),
+                        })
                     } else {
                         log::debug!("Mistake: expected '{}' but got '{}'", &expected, &key);
                         if !p.last_is_mistake {
                             p.last_is_mistake = true;
                             p.mistakes += 1;
-                        }
+                            p.stats.keystrokes.push(Keystroke {
+                                key,
+                                mistake: true,
+                                expected: Some(expected.to_string()),
+                                timestamp: chrono::Utc::now().naive_utc(),
+                            });
+                        } else if let Some(keystroke) = p.stats.keystrokes.last_mut() {
+                            keystroke.key += &key
+                        };
                     }
                 } else {
                     // extra key presses after end
                     if !p.last_is_mistake {
                         p.last_is_mistake = true;
                         p.mistakes += 1;
+                        p.stats.keystrokes.push(Keystroke {
+                            key,
+                            mistake: true,
+                            expected: None,
+                            timestamp: chrono::Utc::now().naive_utc(),
+                        });
                     }
                 }
 
@@ -320,10 +351,15 @@ impl RoomsManager {
                 let room = room.downgrade();
 
                 let now = chrono::Utc::now();
-                let elapsed_secs = (now - start_time).num_seconds() as f32;
+                let elapsed_secs = (now - start_time).as_seconds_f32();
                 let words_typed = p.typed_text.split_whitespace().count() as f32;
                 let speed_wpm =
                     if elapsed_secs > 0.0 { (words_typed / elapsed_secs) * 60.0 } else { 0.0 };
+                let speed_cpm = if elapsed_secs > 0.0 {
+                    (typed_count as f32 / elapsed_secs) * 60.0
+                } else {
+                    0.0
+                };
 
                 let update_msg = WsMessage::Update { progress, mistakes: p.mistakes, speed_wpm };
                 // TODO: check if success
@@ -333,7 +369,7 @@ impl RoomsManager {
                 if p.typed_text == text_to_type {
                     let now = chrono::Utc::now();
                     let total_time_ms = (now - start_time).num_milliseconds() as u64;
-                    let multiplier = typed_count.saturating_sub(p.mistakes) as f32;
+                    let multiplier = typed_count.saturating_sub(p.mistakes as u32) as f32;
 
                     let accuracy = 100.0 * multiplier / (typed_count as f32);
 
@@ -357,6 +393,22 @@ impl RoomsManager {
                         .collect();
 
                     room.broadcast_message(&WsMessage::RoomUpdate { users }).await;
+
+                    let mut conn = self.db.get().await.unwrap();
+
+                    let result = Results {
+                        id: Uuid::new_v4(),
+                        user_id,
+                        start_time: start_time.naive_utc(),
+                        end_time: now.naive_utc(),
+                        text_id: room.text.id,
+                        mistakes: p.mistakes,
+                        wpm: speed_wpm,
+                        cpm: speed_cpm,
+                        stats: p.stats,
+                    };
+
+                    let _ = result.insert_result(&mut conn).await;
 
                     log::debug!("User finished typing!");
                 }
