@@ -135,7 +135,7 @@ impl RoomsManager {
                     })
                     .collect();
 
-                room.broadcast_message(&WsMessage::RoomUpdate { users: stats }).await;
+                room.broadcast_message(WsMessage::RoomUpdate { users: stats }).await;
             }
         });
 
@@ -193,7 +193,7 @@ impl RoomsManager {
             })
             .collect();
 
-        room.broadcast_message(&WsMessage::RoomUpdate { users }).await;
+        room.broadcast_message(WsMessage::RoomUpdate { users }).await;
 
         log::debug!("Inserted to room {}", room_id);
 
@@ -218,7 +218,7 @@ impl RoomsManager {
 
             // Notify others
             let message = WsMessage::UserLeft { user_id: player_id };
-            room.broadcast_message(&message).await;
+            room.broadcast_message(message).await;
         }
 
         if to_delete {
@@ -261,7 +261,7 @@ impl RoomsManager {
         room.start_time = start_time;
 
         log::debug!("before broadcast");
-        room.broadcast_message(&start_msg).await;
+        room.broadcast_message(start_msg).await;
         log::debug!("after broadcast");
         drop(room);
 
@@ -363,7 +363,7 @@ impl RoomsManager {
 
                 let update_msg = WsMessage::Update { progress, mistakes: p.mistakes, speed_wpm };
                 // TODO: check if success
-                room.send_message_to_player(user_id, &update_msg).await;
+                room.send_message_to_player(user_id, update_msg).await;
 
                 // Finish!
                 if p.typed_text == text_to_type {
@@ -379,7 +379,7 @@ impl RoomsManager {
                         accuracy: accuracy.max(0.0),
                         speed_wpm,
                     };
-                    let _ = room.send_message_to_player(user_id, &finished_msg).await;
+                    let _ = room.send_message_to_player(user_id, finished_msg).await;
 
                     let users = room
                         .players
@@ -392,7 +392,7 @@ impl RoomsManager {
                         })
                         .collect();
 
-                    room.broadcast_message(&WsMessage::RoomUpdate { users }).await;
+                    room.broadcast_message(WsMessage::RoomUpdate { users }).await;
 
                     let mut conn = self.db.get().await.unwrap();
 
@@ -416,7 +416,7 @@ impl RoomsManager {
             other => {
                 log::debug!("Unexpected message: {:?}", other);
                 let message = WsMessage::Error { message: "Unexpected message type".to_string() };
-                self._send_message_to_user_in_room(room_id, user_id, &message).await;
+                self._send_message_to_user_in_room(room_id, user_id, message).await;
             },
         }
     }
@@ -425,14 +425,14 @@ impl RoomsManager {
         log::debug!("Error parsing message: {:?}", err);
         let message = WsMessage::Error { message: "Invalid JSON format".to_string() };
 
-        self._send_message_to_user_in_room(room_id, user_id, &message).await;
+        self._send_message_to_user_in_room(room_id, user_id, message).await;
     }
 
     pub async fn _send_message_to_user_in_room(
         &self,
         room_id: Uuid,
         user_id: Uuid,
-        message: &WsMessage,
+        message: WsMessage,
     ) {
         let rooms = self.rooms.read().await;
         let Some(room) = rooms.get(&room_id) else {
@@ -445,17 +445,17 @@ impl RoomsManager {
 }
 
 impl Room {
-    pub async fn broadcast_message(&self, message: &WsMessage) {
+    pub async fn broadcast_message(&self, message: WsMessage) {
         for player in self.players.values() {
-            let text = serde_json::to_string(message).unwrap();
+            let text = serde_json::to_string(&message).unwrap();
             log::debug!("Socket broadcast: {}", &text);
             let _ = player.sender.send(Message::Text(text.into()));
         }
     }
 
-    pub async fn send_message_to_player(&self, player_id: Uuid, message: &WsMessage) {
+    pub async fn send_message_to_player(&self, player_id: Uuid, message: WsMessage) {
         if let Some(player) = self.players.get(&player_id) {
-            let text = serde_json::to_string(message).unwrap();
+            let text = serde_json::to_string(&message).unwrap();
             let _ = player.sender.send(Message::Text(text.into()));
         }
     }
