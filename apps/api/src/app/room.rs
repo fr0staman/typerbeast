@@ -235,14 +235,17 @@ impl RoomsManager {
         let mut to_delete = false;
         if let Some(room) = self.rooms.read().await.get(&room_id) {
             let mut room = room.write().await;
-            let player = match room.players.get_mut(&player_id) {
-                Some(player) => player,
-                None => return,
+            let Some(player) = room.players.get_mut(&player_id) else {
+                log::error!("Player {} not found in room {}", player_id, room_id);
+                return;
             };
 
             player.connected = false;
 
-            if !room.players.iter().all(|p| p.1.connected) {
+            let room = room.downgrade();
+
+            // Check if room is empty
+            if room.players.iter().all(|(_, p)| !p.connected) {
                 // Try to avoid long locks
                 to_delete = true;
             }
