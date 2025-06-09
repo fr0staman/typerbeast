@@ -10,6 +10,8 @@ use crate::{
     app::types::DbPool,
     db::models::{
         result::{Keystroke, ResultStats, Results},
+        room::Room as RoomModel,
+        room_user::RoomUser,
         text::Text,
     },
 };
@@ -67,6 +69,7 @@ pub struct Room {
 #[derive(Clone, Serialize, Debug)]
 pub struct Player {
     pub id: Uuid,
+    pub room_user_id: Uuid,
     #[serde(skip_deserializing, skip_serializing)]
     pub sender: UnboundedSender<Message>, // axum::extract::ws::WebSocketSender,
     pub typed_text: String,
@@ -102,11 +105,25 @@ impl RoomsManager {
             start_notifier,
         };
 
+        let room_model = RoomModel {
+            id,
+            text_id: room.text.id,
+            created_at: chrono::Utc::now().naive_utc(),
+            // Update after some time
+            started_at: chrono::Utc::now().naive_utc(),
+            ended_at: chrono::Utc::now().naive_utc(),
+        };
+
+        let mut conn = self.db.get().await.unwrap();
+        let _ = room_model.insert_room(&mut conn).await;
+
         let locked_room = Arc::new(RwLock::new(room));
 
         self.rooms.write().await.insert(id, locked_room);
 
         let rooms = self.rooms.clone();
+
+        // Stats autoupdate task
         tokio::spawn(async move {
             loop {
                 tokio::time::sleep(tokio::time::Duration::from_secs(3)).await;
@@ -166,21 +183,35 @@ impl RoomsManager {
         let rooms = self.rooms.read().await;
         let room = rooms.get(&room_id).ok_or(MyError::InternalError)?;
         log::debug!("Joining room {}", room_id);
+
+        let room_user_id = Uuid::new_v4();
+
+        let live_player = Player {
+            id: player_id,
+            room_user_id,
+            sender,
+            status: PlayerStatus::Idle,
+            typed_text: String::new(),
+            mistakes: 0,
+            last_is_mistake: false,
+            progress: 0.0,
+            connected: true,
+            stats: ResultStats { keystrokes: vec![] },
+        };
+
+        let player_model = RoomUser {
+            id: room_user_id,
+            room_id,
+            user_id: player_id,
+            joined_at: chrono::Utc::now().naive_utc(),
+            left_at: chrono::Utc::now().naive_utc(),
+        };
+
+        let mut conn = self.db.get().await.unwrap();
+
+        let _ = player_model.insert_room_user(&mut conn).await;
         let mut room = room.write().await;
-        room.players.insert(
-            player_id,
-            Player {
-                id: player_id,
-                sender,
-                status: PlayerStatus::Idle,
-                typed_text: String::new(),
-                mistakes: 0,
-                last_is_mistake: false,
-                progress: 0.0,
-                connected: true,
-                stats: ResultStats { keystrokes: vec![] },
-            },
-        );
+        room.players.insert(player_id, live_player);
 
         let users = room
             .players
@@ -269,6 +300,17 @@ impl RoomsManager {
         let now = Utc::now();
         let delay = (start_time - now).to_std().unwrap_or_default();
         tokio::time::sleep(delay).await;
+
+        let mut conn = self.db.get().await.unwrap();
+
+        let Ok(Some(mut room_model)) = RoomModel::get_room_by_id(&mut conn, room_id).await else {
+            log::error!("Room not found after countdown");
+            return;
+        };
+
+        room_model.started_at = chrono::Utc::now().naive_utc();
+        let _ = room_model.modify_room(&mut conn).await;
+
         let mut room = rooms.get(&room_id).unwrap().write().await;
 
         room.started = true;
@@ -367,50 +409,9 @@ impl RoomsManager {
 
                 // Finish!
                 if p.typed_text == text_to_type {
-                    let now = chrono::Utc::now();
-                    let total_time_ms = (now - start_time).num_milliseconds() as u64;
-                    let multiplier = typed_count.saturating_sub(p.mistakes as u32) as f32;
-
-                    let accuracy = 100.0 * multiplier / (typed_count as f32);
-
-                    let finished_msg = WsMessage::Finished {
-                        total_time_ms,
-                        mistakes: p.mistakes,
-                        accuracy: accuracy.max(0.0),
-                        speed_wpm,
-                    };
-                    let _ = room.send_message_to_player(user_id, finished_msg).await;
-
-                    let users = room
-                        .players
-                        .iter()
-                        .map(|(id, player)| PlayerStats {
-                            id: *id,
-                            mistakes: player.mistakes,
-                            status: player.status.clone(),
-                            progress: player.progress,
-                        })
-                        .collect();
-
-                    room.broadcast_message(WsMessage::RoomUpdate { users }).await;
-
-                    let mut conn = self.db.get().await.unwrap();
-
-                    let result = Results {
-                        id: Uuid::new_v4(),
-                        user_id,
-                        start_time: start_time.naive_utc(),
-                        end_time: now.naive_utc(),
-                        text_id: room.text.id,
-                        mistakes: p.mistakes,
-                        wpm: speed_wpm,
-                        cpm: speed_cpm,
-                        stats: p.stats,
-                    };
-
-                    let _ = result.insert_result(&mut conn).await;
-
-                    log::debug!("User finished typing!");
+                    // TODO: make this function more... maintainable...
+                    self._user_finished_typing(p, room.clone(), speed_cpm, speed_wpm, typed_count)
+                        .await;
                 }
             },
             other => {
@@ -441,6 +442,70 @@ impl RoomsManager {
         };
 
         room.read().await.send_message_to_player(user_id, message).await;
+    }
+
+    pub async fn _user_finished_typing(
+        &self,
+        p: Player,
+        room: Room,
+        speed_cpm: f32,
+        speed_wpm: f32,
+        typed_count: u32,
+    ) {
+        let now = chrono::Utc::now();
+        let total_time_ms = (now - room.start_time).num_milliseconds() as u64;
+        let multiplier = typed_count.saturating_sub(p.mistakes as u32) as f32;
+
+        let accuracy = 100.0 * multiplier / (typed_count as f32);
+
+        let finished_msg = WsMessage::Finished {
+            total_time_ms,
+            mistakes: p.mistakes,
+            accuracy: accuracy.max(0.0),
+            speed_wpm,
+        };
+        let _ = room.send_message_to_player(p.id, finished_msg).await;
+
+        let users = room
+            .players
+            .iter()
+            .map(|(id, player)| PlayerStats {
+                id: *id,
+                mistakes: player.mistakes,
+                status: player.status.clone(),
+                progress: player.progress,
+            })
+            .collect();
+
+        room.broadcast_message(WsMessage::RoomUpdate { users }).await;
+
+        let result = Results {
+            id: Uuid::new_v4(),
+            room_user_id: p.room_user_id,
+            start_time: room.start_time.naive_utc(),
+            end_time: now.naive_utc(),
+            mistakes: p.mistakes,
+            wpm: speed_wpm,
+            cpm: speed_cpm,
+            stats: p.stats,
+        };
+
+        let mut conn = self.db.get().await.unwrap();
+
+        let Ok(Some(mut room_user)) =
+            RoomUser::get_room_user_by_id(&mut conn, p.room_user_id).await
+        else {
+            log::error!("Failed to get room user");
+            return;
+        };
+
+        room_user.left_at = now.naive_utc();
+
+        let _ = room_user.modify_room_user(&mut conn).await;
+
+        let _ = result.insert_result(&mut conn).await;
+
+        log::debug!("User finished typing!");
     }
 }
 

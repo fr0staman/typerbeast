@@ -47,14 +47,13 @@ impl ToSql<Jsonb, Pg> for ResultStats {
 #[diesel(table_name = results)]
 pub struct Results {
     pub id: Uuid,
-    pub text_id: Uuid,
-    pub user_id: Uuid,
     pub start_time: NaiveDateTime,
     pub end_time: NaiveDateTime,
     pub mistakes: i16,
     pub wpm: f32,
     pub cpm: f32,
     pub stats: ResultStats,
+    pub room_user_id: Uuid,
 }
 
 impl Results {
@@ -63,12 +62,12 @@ impl Results {
         Ok(results.filter(id.eq(id_result)).first(conn).await.optional()?)
     }
 
-    pub async fn get_results_by_user_id(
+    pub async fn get_results_by_room_user_id(
         conn: &mut DbConn,
-        id_user: Uuid,
+        id_room_user: Uuid,
     ) -> MyResult<Vec<Results>> {
         use crate::db::schema::results::dsl::*;
-        Ok(results.filter(user_id.eq(id_user)).load(conn).await?)
+        Ok(results.filter(room_user_id.eq(id_room_user)).load(conn).await?)
     }
 
     pub async fn insert_result(self, conn: &mut DbConn) -> MyResult<Results> {
