@@ -416,16 +416,7 @@ impl RoomsManager {
             other => {
                 log::debug!("Unexpected message: {:?}", other);
                 let message = WsMessage::Error { message: "Unexpected message type".to_string() };
-                let _ = self
-                    .rooms
-                    .read()
-                    .await
-                    .get(&room_id)
-                    .unwrap()
-                    .write()
-                    .await
-                    .send_message_to_player(user_id, &message)
-                    .await;
+                self._send_message_to_user_in_room(room_id, user_id, &message).await;
             },
         }
     }
@@ -433,15 +424,23 @@ impl RoomsManager {
     pub async fn handle_error(&self, room_id: Uuid, user_id: Uuid, err: serde_json::Error) {
         log::debug!("Error parsing message: {:?}", err);
         let message = WsMessage::Error { message: "Invalid JSON format".to_string() };
-        self.rooms
-            .read()
-            .await
-            .get(&room_id)
-            .unwrap()
-            .write()
-            .await
-            .send_message_to_player(user_id, &message)
-            .await;
+
+        self._send_message_to_user_in_room(room_id, user_id, &message).await;
+    }
+
+    pub async fn _send_message_to_user_in_room(
+        &self,
+        room_id: Uuid,
+        user_id: Uuid,
+        message: &WsMessage,
+    ) {
+        let rooms = self.rooms.read().await;
+        let Some(room) = rooms.get(&room_id) else {
+            log::error!("Try to send message to room that doesn't exist");
+            return;
+        };
+
+        room.read().await.send_message_to_player(user_id, message).await;
     }
 }
 
