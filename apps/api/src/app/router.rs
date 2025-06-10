@@ -19,6 +19,7 @@ pub fn build_router(state: AppState) -> Router<()> {
         .routes(routes!(routes::ws::ws_handler))
         .routes(routes!(routes::rooms::get_rooms, routes::rooms::create_room,))
         .routes(routes!(routes::rooms::start_room))
+        .routes(routes!(routes::dictionaries::create_room_with_dictionary))
         .split_for_parts();
 
     router
