@@ -5,7 +5,7 @@ use uuid::Uuid;
 
 use crate::{
     app::types::{DbConn, MyResult},
-    db::schema::users,
+    db::{custom_types::UserRoles, schema::users},
 };
 
 #[derive(Queryable, Selectable, Insertable, Debug)]
@@ -16,6 +16,7 @@ pub struct User {
     pub email: String,
     pub password_hash: String,
     pub created_at: NaiveDateTime,
+    pub role: UserRoles,
 }
 
 impl User {

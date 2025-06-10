@@ -25,7 +25,10 @@ use crate::{
         error::{AuthError, MyError},
         types::MyResult,
     },
-    db::models::{session::Session, user::User},
+    db::{
+        custom_types::UserRoles,
+        models::{session::Session, user::User},
+    },
     utils,
 };
 
@@ -186,6 +189,7 @@ pub async fn signup(
         email: input.email.clone(),
         password_hash,
         created_at: chrono::Utc::now().naive_utc(),
+        role: UserRoles::User,
     };
 
     let user = new_user.insert_user(&mut conn).await?;

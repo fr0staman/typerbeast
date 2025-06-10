@@ -1,11 +1,39 @@
 // @generated automatically by Diesel CLI.
 
+pub mod sql_types {
+    #[derive(diesel::query_builder::QueryId, Clone, diesel::sql_types::SqlType)]
+    #[diesel(postgres_type(name = "reviewtextstatus"))]
+    pub struct Reviewtextstatus;
+
+    #[derive(diesel::query_builder::QueryId, Clone, diesel::sql_types::SqlType)]
+    #[diesel(postgres_type(name = "userroles"))]
+    pub struct Userroles;
+}
+
 diesel::table! {
     dictionaries (id) {
         id -> Uuid,
         name -> Varchar,
         user_id -> Uuid,
         created_at -> Timestamp,
+    }
+}
+
+diesel::table! {
+    use diesel::sql_types::*;
+    use super::sql_types::Reviewtextstatus;
+
+    pending_texts (id) {
+        id -> Uuid,
+        dictionary_id -> Uuid,
+        author_id -> Uuid,
+        title -> Text,
+        content -> Text,
+        created_at -> Timestamp,
+        reviewed_by -> Nullable<Uuid>,
+        reviewed_at -> Nullable<Timestamp>,
+        status -> Reviewtextstatus,
+        reason -> Nullable<Text>,
     }
 }
 
@@ -65,6 +93,9 @@ diesel::table! {
 }
 
 diesel::table! {
+    use diesel::sql_types::*;
+    use super::sql_types::Userroles;
+
     users (id) {
         id -> Uuid,
         #[max_length = 64]
@@ -73,10 +104,12 @@ diesel::table! {
         email -> Varchar,
         password_hash -> Varchar,
         created_at -> Timestamp,
+        role -> Userroles,
     }
 }
 
 diesel::joinable!(dictionaries -> users (user_id));
+diesel::joinable!(pending_texts -> dictionaries (dictionary_id));
 diesel::joinable!(results -> room_users (room_user_id));
 diesel::joinable!(room_users -> rooms (room_id));
 diesel::joinable!(room_users -> users (user_id));
@@ -86,6 +119,7 @@ diesel::joinable!(texts -> dictionaries (dictionary_id));
 
 diesel::allow_tables_to_appear_in_same_query!(
     dictionaries,
+    pending_texts,
     results,
     room_users,
     rooms,

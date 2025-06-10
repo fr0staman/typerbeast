@@ -20,6 +20,7 @@ diesel = { version = "2.2.10", features = [
     "serde_json",
 ] }
 diesel-async = { version = "0.5.2", features = ["postgres", "deadpool"] }
+diesel-derive-enum = { version = "3.0.0-beta.1", features = ["postgres"] }
 dotenvy = "0.15.7"
 futures = { version = "0.3.31", default-features = false }
 ipnetwork = "0.21.1"
