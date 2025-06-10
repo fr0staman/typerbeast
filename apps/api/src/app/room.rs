@@ -8,11 +8,14 @@ use uuid::Uuid;
 
 use crate::{
     app::types::DbPool,
-    db::models::{
-        result::{Keystroke, ResultStats, Results},
-        room::Room as RoomModel,
-        room_user::RoomUser,
-        text::Text,
+    db::{
+        custom_types::Leagues,
+        models::{
+            result::{Keystroke, ResultStats, Results},
+            room::Room as RoomModel,
+            room_user::RoomUser,
+            text::Text,
+        },
     },
 };
 
@@ -206,6 +209,7 @@ impl RoomsManager {
             user_id: player_id,
             joined_at: chrono::Utc::now().naive_utc(),
             left_at: chrono::Utc::now().naive_utc(),
+            league: Leagues::Web,
         };
 
         let mut conn = self.db.get().await.unwrap();

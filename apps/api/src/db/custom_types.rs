@@ -19,3 +19,12 @@ pub enum UserRoles {
     Moderator,
     User,
 }
+
+#[derive(
+    diesel_derive_enum::DbEnum, PartialEq, Debug, Serialize, Deserialize, Clone, utoipa::ToSchema,
+)]
+#[db_enum(existing_type_path = "crate::db::schema::sql_types::Leagues")]
+pub enum Leagues {
+    Mobile,
+    Web,
+}

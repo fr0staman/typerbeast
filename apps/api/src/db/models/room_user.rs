@@ -5,7 +5,7 @@ use uuid::Uuid;
 
 use crate::{
     app::types::{DbConn, MyResult},
-    db::schema::room_users,
+    db::{custom_types::Leagues, schema::room_users},
 };
 #[derive(Queryable, Selectable, Insertable, Debug, AsChangeset)]
 #[diesel(table_name = room_users)]
@@ -15,6 +15,7 @@ pub struct RoomUser {
     pub user_id: Uuid,
     pub joined_at: NaiveDateTime,
     pub left_at: NaiveDateTime,
+    pub league: Leagues,
 }
 
 impl RoomUser {

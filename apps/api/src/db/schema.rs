@@ -2,6 +2,10 @@
 
 pub mod sql_types {
     #[derive(diesel::query_builder::QueryId, Clone, diesel::sql_types::SqlType)]
+    #[diesel(postgres_type(name = "leagues"))]
+    pub struct Leagues;
+
+    #[derive(diesel::query_builder::QueryId, Clone, diesel::sql_types::SqlType)]
     #[diesel(postgres_type(name = "reviewtextstatus"))]
     pub struct Reviewtextstatus;
 
@@ -51,12 +55,16 @@ diesel::table! {
 }
 
 diesel::table! {
+    use diesel::sql_types::*;
+    use super::sql_types::Leagues;
+
     room_users (id) {
         id -> Uuid,
         room_id -> Uuid,
         user_id -> Uuid,
         joined_at -> Timestamp,
         left_at -> Timestamp,
+        league -> Leagues,
     }
 }
 
