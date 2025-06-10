@@ -74,4 +74,19 @@ impl Dictionary {
 
         Ok(result)
     }
+
+    pub async fn get_random_text_in_dictionary(&self, conn: &mut DbConn) -> MyResult<Option<Text>> {
+        use crate::db::schema::texts::dsl::*;
+
+        let result = texts
+            .filter(dictionary_id.eq(self.id))
+            .order(diesel::dsl::sql::<diesel::sql_types::Double>("RANDOM()"))
+            .limit(1)
+            .select(Text::as_select())
+            .first(conn)
+            .await
+            .optional()?;
+
+        Ok(result)
+    }
 }

@@ -2,14 +2,16 @@ import { fetchWithAuth } from "@/app/hooks/fetchWithAuth";
 import { useMutation } from "@tanstack/react-query";
 import { PUBLIC_API_URL } from "@/app/store/config";
 
-async function createRoom(text_id: string): Promise<string> {
-  const res = await fetchWithAuth(PUBLIC_API_URL + "/rooms", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
+async function createRoom(dict_id: string): Promise<string> {
+  const res = await fetchWithAuth(
+    PUBLIC_API_URL + `/dictionaries/${dict_id}/create-random-room`,
+    {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
     },
-    body: JSON.stringify({ text_id }),
-  });
+  );
   if (!res.ok) {
     throw new Error("Failed to create room");
   }
