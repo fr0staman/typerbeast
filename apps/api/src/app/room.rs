@@ -31,7 +31,7 @@ pub enum WsMessage {
     Error { message: String },
 }
 
-#[derive(Serialize, Deserialize, Clone, Debug, utoipa::ToSchema)]
+#[derive(Serialize, Deserialize, PartialEq, Clone, Debug, utoipa::ToSchema)]
 pub enum PlayerStatus {
     Idle,
     Started,
@@ -128,14 +128,12 @@ impl RoomsManager {
             loop {
                 tokio::time::sleep(tokio::time::Duration::from_secs(3)).await;
 
-                let rooms = rooms.read().await;
-                let room = match rooms.get(&id) {
-                    Some(room) => room.read().await,
-                    None => {
-                        log::debug!("Room {} destroyed, task also.", &id);
-                        break;
-                    },
+                let Some(room) = rooms.read().await.get(&id).cloned() else {
+                    log::debug!("Room {} destroyed, task also", id);
+                    break;
                 };
+
+                let room = room.read().await;
 
                 if !room.started {
                     continue;
@@ -180,8 +178,11 @@ impl RoomsManager {
         player_id: Uuid,
         sender: UnboundedSender<Message>,
     ) -> MyResult<()> {
-        let rooms = self.rooms.read().await;
-        let room = rooms.get(&room_id).ok_or(MyError::InternalError)?;
+        let Some(room) = self._get_room(room_id).await else {
+            log::error!("Try to join room that doesn't exist");
+            return Err(MyError::InternalError);
+        };
+
         log::debug!("Joining room {}", room_id);
 
         let room_user_id = Uuid::new_v4();
@@ -213,6 +214,7 @@ impl RoomsManager {
         let mut room = room.write().await;
         room.players.insert(player_id, live_player);
 
+        let room = room.downgrade();
         let users = room
             .players
             .iter()
@@ -233,7 +235,13 @@ impl RoomsManager {
 
     pub async fn leave_room(&self, room_id: Uuid, player_id: Uuid) {
         let mut to_delete = false;
-        if let Some(room) = self.rooms.read().await.get(&room_id) {
+
+        let Some(room) = self._get_room(room_id).await else {
+            log::error!("Room {} to leave room that doesn't exist", room_id);
+            return;
+        };
+
+        {
             let mut room = room.write().await;
             let Some(player) = room.players.get_mut(&player_id) else {
                 log::error!("Player {} not found in room {}", player_id, room_id);
@@ -261,16 +269,12 @@ impl RoomsManager {
     }
 
     pub async fn wait_to_start_typing_session(&self, room_id: Uuid) {
-        let rooms = self.rooms.read().await;
-        let Some(room) = rooms.get(&room_id) else {
+        let Some(room) = self._get_room(room_id).await else {
+            log::error!("Room {} not found", room_id);
             return;
         };
 
-        let room = room.read().await;
-
-        let mut start_receiver = room.start_notifier.subscribe();
-        drop(room);
-        drop(rooms);
+        let mut start_receiver = room.read().await.start_notifier.subscribe();
 
         loop {
             if *start_receiver.borrow() {
@@ -284,19 +288,20 @@ impl RoomsManager {
     }
 
     pub async fn start_countdown(&self, room_id: Uuid) {
-        let rooms = self.rooms.read().await;
-        let room = rooms.get(&room_id).unwrap().read().await;
+        let Some(room) = self._get_room(room_id).await else {
+            log::error!("Room {} not found", room_id);
+            return;
+        };
+
+        let mut room = room.write().await;
         let start_time = Utc::now() + Duration::seconds(10);
         let start_msg = WsMessage::Start { text: room.text.content.clone(), start_time };
 
-        drop(room);
-        let rooms = self.rooms.read().await;
-        let mut room = rooms.get(&room_id).unwrap().write().await;
         room.start_time = start_time;
 
-        log::debug!("before broadcast");
+        let room = room.downgrade();
         room.broadcast_message(start_msg).await;
-        log::debug!("after broadcast");
+
         drop(room);
 
         // Wait until real start moment
@@ -314,9 +319,14 @@ impl RoomsManager {
         room_model.started_at = chrono::Utc::now().naive_utc();
         let _ = room_model.modify_room(&mut conn).await;
 
-        let mut room = rooms.get(&room_id).unwrap().write().await;
+        let Some(room) = self._get_room(room_id).await else {
+            log::error!("Room {} not found", room_id);
+            return;
+        };
 
+        let mut room = room.write().await;
         room.started = true;
+        let room = room.downgrade();
         let _ = room.start_notifier.send(true);
     }
 
@@ -325,8 +335,7 @@ impl RoomsManager {
             WsMessage::Keystroke { key, timestamp } => {
                 log::debug!("Received key '{}' at {}", key, timestamp);
 
-                let mut rooms = self.rooms.write().await;
-                let Some(room) = rooms.get_mut(&room_id) else {
+                let Some(room) = self._get_room(room_id).await else {
                     log::debug!("room not exist, how?");
                     return;
                 };
@@ -340,46 +349,48 @@ impl RoomsManager {
                 };
 
                 // Compare key with expected character
-                let expected_char = text_to_type.chars().nth(p.typed_text.chars().count());
+                {
+                    let expected_char = text_to_type.chars().nth(p.typed_text.chars().count());
 
-                if let Some(expected) = expected_char {
-                    if key == expected.to_string() {
-                        p.typed_text.push_str(&key);
-                        p.last_is_mistake = false;
-                        p.stats.keystrokes.push(Keystroke {
-                            key,
-                            mistake: false,
-                            expected: None,
-                            timestamp: chrono::Utc::now().naive_utc(),
-                        })
+                    if let Some(expected) = expected_char {
+                        if key == expected.to_string() {
+                            p.typed_text.push_str(&key);
+                            p.last_is_mistake = false;
+                            p.stats.keystrokes.push(Keystroke {
+                                key,
+                                mistake: false,
+                                expected: None,
+                                timestamp: chrono::Utc::now().naive_utc(),
+                            })
+                        } else {
+                            log::debug!("Mistake: expected '{}' but got '{}'", &expected, &key);
+                            if !p.last_is_mistake {
+                                p.last_is_mistake = true;
+                                p.mistakes += 1;
+                                p.stats.keystrokes.push(Keystroke {
+                                    key,
+                                    mistake: true,
+                                    expected: Some(expected.to_string()),
+                                    timestamp: chrono::Utc::now().naive_utc(),
+                                });
+                            } else if let Some(keystroke) = p.stats.keystrokes.last_mut() {
+                                keystroke.key += &key
+                            };
+                        }
                     } else {
-                        log::debug!("Mistake: expected '{}' but got '{}'", &expected, &key);
+                        // extra key presses after end
                         if !p.last_is_mistake {
                             p.last_is_mistake = true;
                             p.mistakes += 1;
                             p.stats.keystrokes.push(Keystroke {
                                 key,
                                 mistake: true,
-                                expected: Some(expected.to_string()),
+                                expected: None,
                                 timestamp: chrono::Utc::now().naive_utc(),
                             });
-                        } else if let Some(keystroke) = p.stats.keystrokes.last_mut() {
-                            keystroke.key += &key
-                        };
+                        }
                     }
-                } else {
-                    // extra key presses after end
-                    if !p.last_is_mistake {
-                        p.last_is_mistake = true;
-                        p.mistakes += 1;
-                        p.stats.keystrokes.push(Keystroke {
-                            key,
-                            mistake: true,
-                            expected: None,
-                            timestamp: chrono::Utc::now().naive_utc(),
-                        });
-                    }
-                }
+                };
 
                 let typed_count = p.typed_text.chars().count() as u32;
                 let expected_count = text_to_type.chars().count() as u32;
@@ -391,9 +402,11 @@ impl RoomsManager {
                 if p.typed_text == text_to_type {
                     p.status = PlayerStatus::Finished;
                 }
-                let p = p.clone();
+
                 // We don't need any writes - we can downgrade.
-                let room = room.downgrade();
+
+                let p = p.clone();
+                let room = room.downgrade().clone();
 
                 let now = chrono::Utc::now();
                 let elapsed_secs = (now - start_time).as_seconds_f32();
@@ -411,10 +424,10 @@ impl RoomsManager {
                 room.send_message_to_player(user_id, update_msg).await;
 
                 // Finish!
-                if p.typed_text == text_to_type {
+                let is_finish = p.typed_text == text_to_type;
+                if is_finish {
                     // TODO: make this function more... maintainable...
-                    self._user_finished_typing(p, room.clone(), speed_cpm, speed_wpm, typed_count)
-                        .await;
+                    self._user_finished_typing(p, room, speed_cpm, speed_wpm, typed_count).await;
                 }
             },
             other => {
@@ -438,8 +451,7 @@ impl RoomsManager {
         user_id: Uuid,
         message: WsMessage,
     ) {
-        let rooms = self.rooms.read().await;
-        let Some(room) = rooms.get(&room_id) else {
+        let Some(room) = self._get_room(room_id).await else {
             log::error!("Try to send message to room that doesn't exist");
             return;
         };
@@ -508,7 +520,48 @@ impl RoomsManager {
 
         let _ = result.insert_result(&mut conn).await;
 
+        let should_close = room.players.iter().all(|(_, p)| p.status == PlayerStatus::Finished);
+        let room_id = room.id;
+
+        if should_close {
+            self._close_room(room_id).await;
+            log::debug!("Room finished!");
+        } else {
+            log::error!("Its not finished yet!");
+        }
         log::debug!("User finished typing!");
+    }
+
+    pub async fn _close_room(&self, room_id: Uuid) {
+        let ended_at = chrono::Utc::now().naive_utc();
+
+        let Some(room) = self._get_room(room_id).await else {
+            log::error!("Try to close room that doesn't exist");
+            return;
+        };
+
+        let mut room = room.write().await;
+
+        for (_, player) in room.players.iter_mut() {
+            player.connected = false;
+        }
+        let room = room.downgrade();
+
+        room.close_connections().await;
+        drop(room);
+
+        let mut conn = self.db.get().await.unwrap();
+        let Ok(Some(mut room_model)) = RoomModel::get_room_by_id(&mut conn, room_id).await else {
+            log::error!("Room not found after closing");
+            return;
+        };
+
+        room_model.ended_at = ended_at;
+        let _ = room_model.modify_room(&mut conn).await;
+    }
+
+    pub async fn _get_room(&self, room_id: Uuid) -> Option<Arc<RwLock<Room>>> {
+        self.rooms.read().await.get(&room_id).cloned()
     }
 }
 
@@ -525,6 +578,12 @@ impl Room {
         if let Some(player) = self.players.get(&player_id) {
             let text = serde_json::to_string(&message).unwrap();
             let _ = player.sender.send(Message::Text(text.into()));
+        }
+    }
+
+    pub async fn close_connections(&self) {
+        for player in self.players.values() {
+            let _ = player.sender.send(Message::Close(None));
         }
     }
 }
