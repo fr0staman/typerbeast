@@ -1,8 +1,8 @@
 -- Your SQL goes here
 
-CREATE TYPE ReviewTextStatus AS ENUM ('pending', 'approved', 'rejected');
+CREATE TYPE review_text_status AS ENUM ('pending', 'approved', 'rejected');
 
-CREATE TYPE UserRoles AS ENUM ('Creator', 'Moderator', 'User');
+CREATE TYPE user_roles AS ENUM ('creator', 'moderator', 'user');
 
 CREATE TABLE "pending_texts" (
   "id" UUID NOT NULL PRIMARY KEY,
@@ -13,7 +13,7 @@ CREATE TABLE "pending_texts" (
   "created_at" TIMESTAMP NOT NULL,
   "reviewed_by" UUID,
   "reviewed_at" TIMESTAMP,
-  "status" ReviewTextStatus NOT NULL,
+  "status" review_text_status NOT NULL,
   "reason" TEXT,
   FOREIGN KEY ("dictionary_id") REFERENCES "dictionaries"("id"),
   FOREIGN KEY ("author_id") REFERENCES "users"("id"),
@@ -21,8 +21,8 @@ CREATE TABLE "pending_texts" (
 );
 
 
-ALTER TABLE users ADD COLUMN "role" UserRoles;
+ALTER TABLE users ADD COLUMN "role" user_roles;
 
-UPDATE users SET role = 'User';
+UPDATE users SET role = 'user';
 
 ALTER TABLE users ALTER COLUMN "role" SET NOT NULL;

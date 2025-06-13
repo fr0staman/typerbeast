@@ -3,7 +3,7 @@ use serde::{Deserialize, Serialize};
 #[derive(
     diesel_derive_enum::DbEnum, PartialEq, Debug, Serialize, Deserialize, Clone, utoipa::ToSchema,
 )]
-#[db_enum(existing_type_path = "crate::db::schema::sql_types::Reviewtextstatus")]
+#[db_enum(existing_type_path = "crate::db::schema::sql_types::ReviewTextStatus")]
 pub enum ReviewTextStatus {
     Pending,
     Approved,
@@ -13,7 +13,7 @@ pub enum ReviewTextStatus {
 #[derive(
     diesel_derive_enum::DbEnum, PartialEq, Debug, Serialize, Deserialize, Clone, utoipa::ToSchema,
 )]
-#[db_enum(existing_type_path = "crate::db::schema::sql_types::Userroles")]
+#[db_enum(existing_type_path = "crate::db::schema::sql_types::UserRoles")]
 pub enum UserRoles {
     Creator,
     Moderator,

@@ -1,8 +1,8 @@
 -- Your SQL goes here
 
-CREATE TYPE Leagues AS ENUM ('web', 'mobile');
+CREATE TYPE leagues AS ENUM ('web', 'mobile');
 
-ALTER TABLE "room_users" ADD COLUMN league Leagues;
+ALTER TABLE "room_users" ADD COLUMN league leagues;
 
 UPDATE "room_users" SET league = 'web';
 

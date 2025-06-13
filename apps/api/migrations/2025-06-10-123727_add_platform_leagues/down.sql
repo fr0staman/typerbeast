@@ -3,7 +3,7 @@
 
 ALTER TABLE "room_users" DROP COLUMN "league";
 
-DROP TYPE Leagues;
+DROP TYPE leagues;
 
 
 

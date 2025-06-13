@@ -8,5 +8,5 @@ DROP TABLE "pending_texts";
 
 ALTER TABLE "users" DROP COLUMN "role";
 
-DROP TYPE ReviewTextStatus;
-DROP TYPE UserRoles;
+DROP TYPE review_text_status;
+DROP TYPE user_roles;

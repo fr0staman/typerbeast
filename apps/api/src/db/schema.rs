@@ -6,12 +6,12 @@ pub mod sql_types {
     pub struct Leagues;
 
     #[derive(diesel::query_builder::QueryId, Clone, diesel::sql_types::SqlType)]
-    #[diesel(postgres_type(name = "reviewtextstatus"))]
-    pub struct Reviewtextstatus;
+    #[diesel(postgres_type(name = "review_text_status"))]
+    pub struct ReviewTextStatus;
 
     #[derive(diesel::query_builder::QueryId, Clone, diesel::sql_types::SqlType)]
-    #[diesel(postgres_type(name = "userroles"))]
-    pub struct Userroles;
+    #[diesel(postgres_type(name = "user_roles"))]
+    pub struct UserRoles;
 }
 
 diesel::table! {
@@ -25,7 +25,7 @@ diesel::table! {
 
 diesel::table! {
     use diesel::sql_types::*;
-    use super::sql_types::Reviewtextstatus;
+    use super::sql_types::ReviewTextStatus;
 
     pending_texts (id) {
         id -> Uuid,
@@ -36,7 +36,7 @@ diesel::table! {
         created_at -> Timestamp,
         reviewed_by -> Nullable<Uuid>,
         reviewed_at -> Nullable<Timestamp>,
-        status -> Reviewtextstatus,
+        status -> ReviewTextStatus,
         reason -> Nullable<Text>,
     }
 }
@@ -102,7 +102,7 @@ diesel::table! {
 
 diesel::table! {
     use diesel::sql_types::*;
-    use super::sql_types::Userroles;
+    use super::sql_types::UserRoles;
 
     users (id) {
         id -> Uuid,
@@ -112,7 +112,7 @@ diesel::table! {
         email -> Varchar,
         password_hash -> Varchar,
         created_at -> Timestamp,
-        role -> Userroles,
+        role -> UserRoles,
     }
 }
 
