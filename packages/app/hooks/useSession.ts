@@ -13,7 +13,7 @@ export function useSession() {
 }
 
 async function checkProfile(): Promise<User> {
-  const res = await fetchWithAuth(PUBLIC_API_URL + "/user/profile");
+  const res = await fetchWithAuth(PUBLIC_API_URL + "/user/me/profile");
 
   if (!res.ok) throw new Error("Not authenticated");
 

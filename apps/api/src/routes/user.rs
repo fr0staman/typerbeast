@@ -127,7 +127,7 @@ pub struct ProfileResponse {
 
 #[utoipa::path(
     get,
-    path = "/api/v1/user/profile",
+    path = "/api/v1/user/me/profile",
     responses(
         (status = 200, description = "Success", body = ProfileResponse),
         (status = 401, description = "Unauthorized"),

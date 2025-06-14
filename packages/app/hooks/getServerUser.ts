@@ -9,7 +9,7 @@ export async function getServerUser() {
 
   if (!token) return null;
 
-  const res = await fetch(PUBLIC_API_URL + "/user/profile", {
+  const res = await fetch(PUBLIC_API_URL + "/user/me/profile", {
     headers: { Cookie: `${COOKIE_NAME}=${token}` },
   });
 
