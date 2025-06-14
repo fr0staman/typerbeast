@@ -9,6 +9,7 @@ import { ActivityIndicator, View } from "react-native";
 import { SignupScreen } from "@/app/features/SignupScreen";
 import { DictionariesScreen } from "../features/DictionariesScreen";
 import { DictionaryScreen } from "../features/DictionaryScreen";
+import { ProfileScreen } from "../features/ProfileScreen";
 
 const Stack = createNativeStackNavigator<{
   login: undefined;
@@ -24,6 +25,7 @@ const Stack = createNativeStackNavigator<{
   "dictionaries/:dict_id": {
     dict_id: string;
   };
+  profile: undefined;
 }>();
 
 export const AppStack = () => {
@@ -80,6 +82,13 @@ export function MainNavigator() {
       <Stack.Screen
         name="dictionaries/:dict_id"
         component={DictionaryScreen}
+        options={{
+          headerShown: false,
+        }}
+      />
+      <Stack.Screen
+        name="profile"
+        component={ProfileScreen}
         options={{
           headerShown: false,
         }}

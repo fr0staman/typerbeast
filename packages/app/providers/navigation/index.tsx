@@ -30,6 +30,7 @@ export const AppNavContainer = ({
               g: "g/:text_id",
               dictionaries: "dictionaries",
               "dictionaries/:dict_id": "dictionaries/:dict_id",
+              profile: "profile",
             },
           },
         }),
