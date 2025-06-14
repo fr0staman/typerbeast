@@ -6,10 +6,10 @@ use uuid::Uuid;
 
 use crate::{
     app::types::{DbConn, MyResult},
-    db::schema::results,
+    db::{models::room_user::RoomUser, schema::results},
 };
 
-#[derive(Serialize, Deserialize, Debug, Clone)]
+#[derive(Serialize, Deserialize, Debug, Clone, utoipa::ToSchema)]
 pub struct Keystroke {
     // attention key can be more than 1 symbol on mistake, to store user input and analytics
     pub key: String,
@@ -18,7 +18,9 @@ pub struct Keystroke {
     pub timestamp: NaiveDateTime,
 }
 
-#[derive(Serialize, Deserialize, Debug, Clone, diesel::AsExpression, diesel::FromSqlRow)]
+#[derive(
+    Serialize, Deserialize, Debug, Clone, diesel::AsExpression, diesel::FromSqlRow, utoipa::ToSchema,
+)]
 #[diesel[sql_type = diesel::pg::sql_types::Jsonb]]
 pub struct ResultStats {
     pub keystrokes: Vec<Keystroke>,
@@ -43,7 +45,7 @@ impl ToSql<Jsonb, Pg> for ResultStats {
     }
 }
 
-#[derive(Queryable, Selectable, Insertable, Debug)]
+#[derive(Queryable, Selectable, Insertable, Debug, Serialize, Deserialize, utoipa::ToSchema)]
 #[diesel(table_name = results)]
 pub struct Results {
     pub id: Uuid,
@@ -73,5 +75,68 @@ impl Results {
     pub async fn insert_result(self, conn: &mut DbConn) -> MyResult<Results> {
         use crate::db::schema::results::dsl::*;
         Ok(diesel::insert_into(results).values(self).get_result(conn).await?)
+    }
+
+    pub async fn get_last_result_by_user_id(
+        conn: &mut DbConn,
+        id_room_user: Uuid,
+    ) -> MyResult<Option<(Results, RoomUser)>> {
+        use crate::db::schema::results::dsl::*;
+        use crate::db::schema::room_users;
+
+        let result = results
+            .filter(room_users::user_id.eq(id_room_user))
+            .inner_join(room_users::table)
+            .order(end_time.desc())
+            .first(conn)
+            .await
+            .optional()?;
+
+        Ok(result)
+    }
+
+    pub async fn get_results_count_by_user_id(
+        conn: &mut DbConn,
+        id_room_user: Uuid,
+    ) -> MyResult<i64> {
+        use crate::db::schema::results::dsl::*;
+        use crate::db::schema::room_users;
+
+        Ok(results
+            .filter(room_users::user_id.eq(id_room_user))
+            .inner_join(room_users::table)
+            .count()
+            .first(conn)
+            .await?)
+    }
+
+    pub async fn get_average_wpm_cpm_mistakes_in_dictionary_by_user_id(
+        conn: &mut DbConn,
+        id_dictionary: Uuid,
+        id_user: Uuid,
+    ) -> MyResult<Option<(f64, f64, f64)>> {
+        use crate::db::schema::results::dsl::*;
+        use crate::db::schema::room_users;
+        use crate::db::schema::rooms;
+        use crate::db::schema::texts;
+
+        let result = results
+            .inner_join(room_users::table.on(room_users::id.eq(room_user_id)))
+            .inner_join(rooms::table.on(rooms::id.eq(room_users::room_id)))
+            .inner_join(texts::table.on(texts::id.eq(rooms::text_id)))
+            .filter(room_users::user_id.eq(id_user))
+            .filter(texts::dictionary_id.eq(id_dictionary))
+            .select((
+                diesel::dsl::avg(wpm).assume_not_null(),
+                diesel::dsl::avg(cpm).assume_not_null(),
+                // avg(mistakes) -> Numeric, but i cant cast it to double without bigdecimal crate.
+                diesel::dsl::avg(diesel::dsl::sql::<diesel::sql_types::Double>("mistakes::real"))
+                    .assume_not_null(),
+            ))
+            .first(conn)
+            .await
+            .optional()?;
+
+        Ok(result)
     }
 }

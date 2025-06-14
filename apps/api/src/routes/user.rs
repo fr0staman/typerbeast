@@ -27,7 +27,7 @@ use crate::{
     },
     db::{
         custom_types::UserRoles,
-        models::{session::Session, user::User},
+        models::{result::Results, session::Session, user::User},
     },
     utils,
 };
@@ -231,4 +231,49 @@ pub async fn signup(
     let res = LoginResponse { access_token, token_type: "Bearer".to_string() };
 
     Ok((jar.add(cookie), Json(res)))
+}
+
+#[derive(Serialize, Deserialize, utoipa::ToSchema)]
+pub struct UserMeStats {
+    results_count: i64,
+    last_result: Option<Results>,
+    average_wpm: f64,
+    average_cpm: f64,
+    average_mistakes: f64,
+}
+
+#[utoipa::path(
+    get,
+    path = "/api/v1/user/me/stats",
+    responses(
+        (status = 200, description = "Success", body = UserMeStats),
+        (status = 401, description = "Unauthorized"),
+    )
+)]
+pub async fn me_stats(claims: Claims, state: State<AppState>) -> MyResult<Json<UserMeStats>> {
+    let mut conn = state.db().await?;
+
+    let maybe_user = User::get_user(&mut conn, claims.sub).await?;
+    let Some(user) = maybe_user else { return Err(MyError::InternalError) };
+
+    let results_count = Results::get_results_count_by_user_id(&mut conn, user.id).await?;
+    let last_result = Results::get_last_result_by_user_id(&mut conn, user.id).await?;
+    let (average_wpm, average_cpm, average_mistakes) =
+        Results::get_average_wpm_cpm_mistakes_in_dictionary_by_user_id(
+            &mut conn,
+            state.config.default_dictionary_id,
+            user.id,
+        )
+        .await?
+        .unwrap_or((0.0, 0.0, 0.0));
+
+    let res = UserMeStats {
+        results_count,
+        last_result: last_result.map(|r| r.0),
+        average_wpm,
+        average_cpm,
+        average_mistakes,
+    };
+
+    Ok(Json(res))
 }

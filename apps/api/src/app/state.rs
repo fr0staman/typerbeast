@@ -5,6 +5,7 @@ use super::types::{DbPool, DeadpoolResult};
 pub struct AppState {
     pub pool: DbPool,
     pub rooms_manager: RoomsManager,
+    pub config: crate::app::config::AppEnvConfig,
 }
 
 impl AppState {

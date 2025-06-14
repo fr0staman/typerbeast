@@ -21,6 +21,7 @@ pub fn build_router(state: AppState) -> Router<()> {
         .routes(routes!(routes::rooms::start_room))
         .routes(routes!(routes::dictionaries::create_room_with_dictionary))
         .routes(routes!(routes::texts::review_pending_text))
+        .routes(routes!(routes::user::me_stats))
         .split_for_parts();
 
     router
