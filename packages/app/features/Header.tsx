@@ -1,7 +1,6 @@
 "use client";
 
-import { HStack, Text, Image, Link, LinkText } from "@/ui/components";
-//import { User } from "lucide-react-native";
+import { HStack, Text, Link, LinkText } from "@/ui/components";
 import { useLink } from "solito/navigation";
 
 export const Header = () => {
@@ -9,11 +8,15 @@ export const Header = () => {
     href: "/profile",
   });
 
+  const dictionariesLinkProps = useLink({
+    href: "/dictionaries",
+  });
+
   return (
     <HStack className="justify-center px-4 py-3 dark:bg-gray-800 items-center">
-      <HStack space="md" className="w-full md:max-w-7xl items-center">
-        {/* Left: Logo + Name */}
+      <HStack space="xl" className="w-full md:max-w-7xl items-center">
         <HStack className="items-center" space="md">
+          {/*
           <Image
             size="xs"
             // TODO: add logo
@@ -23,9 +26,16 @@ export const Header = () => {
             height={24}
             borderRadius={24}
           />
+          */}
           <Text size="md" bold>
             TYPERBEAST
           </Text>
+        </HStack>
+
+        <HStack space="lg" className="flex-1 items-center">
+          <Link {...dictionariesLinkProps}>
+            <LinkText>Dictionaries</LinkText>
+          </Link>
         </HStack>
 
         <HStack space="lg" className="flex-1 justify-end items-center">

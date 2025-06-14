@@ -72,6 +72,7 @@ pub async fn add_dictionary(
 
 #[derive(Serialize, utoipa::ToSchema)]
 pub struct GetTextsInDictionaryResponse {
+    dictionary: Dictionary,
     list: Vec<Text>,
 }
 
@@ -93,7 +94,8 @@ pub async fn get_texts_in_dictionary(
         Dictionary::get_dictionary_by_id(&mut conn, dict_id).await?.ok_or(MyError::NotFound)?;
     let texts = dictionary.get_texts_in_dictionary(&mut conn).await?;
 
-    let res = GetTextsInDictionaryResponse { list: texts };
+    let res = GetTextsInDictionaryResponse { dictionary, list: texts };
+
     Ok(Json(res))
 }
 

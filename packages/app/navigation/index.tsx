@@ -7,6 +7,8 @@ import { LoginScreen } from "@/app/features/LoginScreen";
 import { useSession } from "@/app/hooks/useSession";
 import { ActivityIndicator, View } from "react-native";
 import { SignupScreen } from "@/app/features/SignupScreen";
+import { DictionariesScreen } from "../features/DictionariesScreen";
+import { DictionaryScreen } from "../features/DictionaryScreen";
 
 const Stack = createNativeStackNavigator<{
   login: undefined;
@@ -17,6 +19,10 @@ const Stack = createNativeStackNavigator<{
   };
   g: {
     text_id: string;
+  };
+  dictionaries: undefined;
+  "dictionaries/:dict_id": {
+    dict_id: string;
   };
 }>();
 
@@ -60,6 +66,20 @@ export function MainNavigator() {
       <Stack.Screen
         name="g"
         component={TypingGame}
+        options={{
+          headerShown: false,
+        }}
+      />
+      <Stack.Screen
+        name="dictionaries"
+        component={DictionariesScreen}
+        options={{
+          headerShown: false,
+        }}
+      />
+      <Stack.Screen
+        name="dictionaries/:dict_id"
+        component={DictionaryScreen}
         options={{
           headerShown: false,
         }}
