@@ -41,79 +41,83 @@ export const LeaderboardScreen = () => {
   }
 
   return (
-    <VStack className="px-4 pt-6 pb-10">
-      <Text className="text-xl font-bold mb-4 text-center">🏆 Leaderboard</Text>
-      {/* Filters */}
-      <Box className="mb-4">
-        <Text className="font-medium mb-1">📚 Dictionary</Text>
-        <ScrollView horizontal className="flex-row gap-2">
-          <Box className="flex-row gap-2">
-            {dictionaries?.list?.map(d => (
+    <VStack className="px-4 py-10">
+      <VStack className="w-full md:max-w-7xl mx-auto space-y-8">
+        <Text className="text-xl font-bold mb-4 text-center">
+          🏆 Leaderboard
+        </Text>
+        {/* Filters */}
+        <Box className="mb-4">
+          <Text className="font-medium mb-1">📚 Dictionary</Text>
+          <ScrollView horizontal className="flex-row gap-2">
+            <Box className="flex-row gap-2">
+              {dictionaries?.list?.map(d => (
+                <Pressable
+                  key={d.id}
+                  className={`px-3 py-1 rounded-full border ${
+                    selectedDict === d.id
+                      ? "bg-blue-500 border-blue-500 text-white"
+                      : "border-gray-300"
+                  }`}
+                  onPress={() =>
+                    setSelectedDict(d.id === selectedDict ? undefined : d.id)
+                  }
+                >
+                  <Text className="text-sm">{d.name}</Text>
+                </Pressable>
+              ))}
+            </Box>
+          </ScrollView>
+        </Box>
+        <Box className="mb-4">
+          <Text className="font-medium mb-1">📱 League</Text>
+          <HStack className="flex-row gap-2">
+            {leagues.map(l => (
               <Pressable
-                key={d.id}
+                key={l}
                 className={`px-3 py-1 rounded-full border ${
-                  selectedDict === d.id
-                    ? "bg-blue-500 border-blue-500 text-white"
+                  selectedLeague === l
+                    ? "bg-green-500 border-green-500 text-white"
                     : "border-gray-300"
                 }`}
                 onPress={() =>
-                  setSelectedDict(d.id === selectedDict ? undefined : d.id)
+                  setSelectedLeague(l === selectedLeague ? undefined : l)
                 }
               >
-                <Text className="text-sm">{d.name}</Text>
+                <Text className="text-sm">{l}</Text>
+              </Pressable>
+            ))}
+          </HStack>
+        </Box>
+        <Box className="mb-4">
+          <Text className="font-medium mb-1">⏱️ Period</Text>
+          <Box className="flex-row gap-2">
+            {periods.map(p => (
+              <Pressable
+                key={p}
+                className={`px-3 py-1 rounded-full border ${
+                  selectedPeriod === p
+                    ? "bg-purple-500 border-purple-500 text-white"
+                    : "border-gray-300"
+                }`}
+                onPress={() => setSelectedPeriod(p)}
+              >
+                <Text className="text-sm">{p}</Text>
               </Pressable>
             ))}
           </Box>
-        </ScrollView>
-      </Box>
-      <Box className="mb-4">
-        <Text className="font-medium mb-1">📱 League</Text>
-        <HStack className="flex-row gap-2">
-          {leagues.map(l => (
-            <Pressable
-              key={l}
-              className={`px-3 py-1 rounded-full border ${
-                selectedLeague === l
-                  ? "bg-green-500 border-green-500 text-white"
-                  : "border-gray-300"
-              }`}
-              onPress={() =>
-                setSelectedLeague(l === selectedLeague ? undefined : l)
-              }
-            >
-              <Text className="text-sm">{l}</Text>
-            </Pressable>
-          ))}
-        </HStack>
-      </Box>
-      <Box className="mb-4">
-        <Text className="font-medium mb-1">⏱️ Period</Text>
-        <Box className="flex-row gap-2">
-          {periods.map(p => (
-            <Pressable
-              key={p}
-              className={`px-3 py-1 rounded-full border ${
-                selectedPeriod === p
-                  ? "bg-purple-500 border-purple-500 text-white"
-                  : "border-gray-300"
-              }`}
-              onPress={() => setSelectedPeriod(p)}
-            >
-              <Text className="text-sm">{p}</Text>
-            </Pressable>
-          ))}
         </Box>
-      </Box>
-      {leaderboardLoading ? (
-        <Text className="text-center mt-4">Loading...</Text>
-      ) : (
-        <FlatList
-          data={users?.users}
-          renderItem={({ item, index }) => (
-            <LeaderboardPlayerItem item={item} index={index} />
-          )}
-        />
-      )}
+        {leaderboardLoading ? (
+          <Text className="text-center mt-4">Loading...</Text>
+        ) : (
+          <FlatList
+            data={users?.users}
+            renderItem={({ item, index }) => (
+              <LeaderboardPlayerItem item={item} index={index} />
+            )}
+          />
+        )}
+      </VStack>
     </VStack>
   );
 };
