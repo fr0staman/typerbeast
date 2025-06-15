@@ -15,6 +15,7 @@ import { TopUser, useLeaderboard } from "../hooks/useLeaderboard";
 import { useState } from "react";
 import { useDictionaries } from "../hooks/useDictionaries";
 import { useLink } from "solito/navigation";
+import dayjs from "dayjs";
 
 const leagues = ["Web", "Mobile"] as const;
 const periods = ["Day", "Week", "Month", "AllTime"] as const;
@@ -69,49 +70,52 @@ export const LeaderboardScreen = () => {
             </Box>
           </ScrollView>
         </Box>
-        <Box className="mb-4">
-          <Text className="font-medium mb-1">📱 League</Text>
-          <HStack className="flex-row gap-2">
-            {leagues.map(l => (
-              <Pressable
-                key={l}
-                className={`px-3 py-1 rounded-full border ${
-                  selectedLeague === l
-                    ? "bg-green-500 border-green-500 text-white"
-                    : "border-gray-300"
-                }`}
-                onPress={() =>
-                  setSelectedLeague(l === selectedLeague ? undefined : l)
-                }
-              >
-                <Text className="text-sm">{l}</Text>
-              </Pressable>
-            ))}
-          </HStack>
-        </Box>
-        <Box className="mb-4">
-          <Text className="font-medium mb-1">⏱️ Period</Text>
-          <Box className="flex-row gap-2">
-            {periods.map(p => (
-              <Pressable
-                key={p}
-                className={`px-3 py-1 rounded-full border ${
-                  selectedPeriod === p
-                    ? "bg-purple-500 border-purple-500 text-white"
-                    : "border-gray-300"
-                }`}
-                onPress={() => setSelectedPeriod(p)}
-              >
-                <Text className="text-sm">{p}</Text>
-              </Pressable>
-            ))}
+        <HStack className="justify-between">
+          <Box className="mb-4">
+            <Text className="font-medium mb-1">📱 League</Text>
+            <HStack className="flex-row gap-2">
+              {leagues.map(l => (
+                <Pressable
+                  key={l}
+                  className={`px-3 py-1 rounded-full border ${
+                    selectedLeague === l
+                      ? "bg-green-500 border-green-500 text-white"
+                      : "border-gray-300"
+                  }`}
+                  onPress={() =>
+                    setSelectedLeague(l === selectedLeague ? undefined : l)
+                  }
+                >
+                  <Text className="text-sm">{l}</Text>
+                </Pressable>
+              ))}
+            </HStack>
           </Box>
-        </Box>
+          <Box className="mb-4">
+            <Text className="font-medium mb-1">⏱️ Period</Text>
+            <Box className="flex-row gap-2">
+              {periods.map(p => (
+                <Pressable
+                  key={p}
+                  className={`px-3 py-1 rounded-full border ${
+                    selectedPeriod === p
+                      ? "bg-purple-500 border-purple-500 text-white"
+                      : "border-gray-300"
+                  }`}
+                  onPress={() => setSelectedPeriod(p)}
+                >
+                  <Text className="text-sm">{p}</Text>
+                </Pressable>
+              ))}
+            </Box>
+          </Box>
+        </HStack>
         {leaderboardLoading ? (
           <Text className="text-center mt-4">Loading...</Text>
         ) : (
           <FlatList
             data={users?.users}
+            ListEmptyComponent={LeaderboardEmpty}
             renderItem={({ item, index }) => (
               <LeaderboardPlayerItem item={item} index={index} />
             )}
@@ -135,6 +139,8 @@ const LeaderboardPlayerItem = ({
     href: `/user/${user.username}`,
   });
 
+  const datetime = dayjs(user.achieved_at).format("DD/MM/YYYY, HH:mm:ss");
+
   return (
     <Box
       key={user.id}
@@ -146,18 +152,29 @@ const LeaderboardPlayerItem = ({
         </Text>
       </Link>
       <Text className="text-sm text-gray-500 dark:text-gray-400">
-        WPM: <Text className="text-white font-bold">{user.wpm}</Text> |
-        Mistakes: {user.mistakes}
+        WPM: <Text className="text-white font-bold">{user.wpm.toFixed(2)}</Text>{" "}
+        | Mistakes: {user.mistakes}
       </Text>
-      <Text className="text-xs mt-1 text-gray-400">
-        Played at: {new Date(user.achieved_at).toLocaleString()}
-      </Text>
+      <Text className="text-xs mt-1 text-gray-400">Played at: {datetime}</Text>
       <Link
         href={`/rooms/${user.room_id}?result=${user.id}`}
         className="mt-2 text-blue-500 underline"
       >
         <LinkText>View Race</LinkText>
       </Link>
+    </Box>
+  );
+};
+
+export const LeaderboardEmpty = () => {
+  return (
+    <Box className="p-4 rounded-2xl border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-900 shadow">
+      <Text className="text-sm text-gray-500 dark:text-gray-400">
+        No users found.
+      </Text>
+      <Text className="text-sm text-gray-500 dark:text-gray-400">
+        Maybe, you will be the first!
+      </Text>
     </Box>
   );
 };
