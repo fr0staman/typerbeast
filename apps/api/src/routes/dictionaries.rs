@@ -98,34 +98,3 @@ pub async fn get_texts_in_dictionary(
 
     Ok(Json(res))
 }
-
-#[derive(Serialize, utoipa::ToSchema)]
-pub struct CreateRoomResponse {
-    room_id: Uuid,
-}
-
-#[utoipa::path(
-    post,
-    path = "/api/v1/dictionaries/{dict_id}/create-random-room",
-    responses(
-        (status = 200, description = "Success", body = CreateRoomResponse),
-        (status = 401, description = "Unauthorized"),
-    )
-)]
-pub async fn create_room_with_dictionary(
-    _: Claims,
-    state: State<AppState>,
-    Path(dict_id): Path<Uuid>,
-) -> MyResult<Json<CreateRoomResponse>> {
-    let mut conn = state.db().await?;
-    let dictionary =
-        Dictionary::get_dictionary_by_id(&mut conn, dict_id).await?.ok_or(MyError::NotFound)?;
-    let text =
-        dictionary.get_random_text_in_dictionary(&mut conn).await?.ok_or(MyError::NotFound)?;
-
-    let room_id = state.rooms_manager.create_room(text).await;
-
-    let res = CreateRoomResponse { room_id };
-
-    Ok(Json(res))
-}

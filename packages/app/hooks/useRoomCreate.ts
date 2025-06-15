@@ -4,9 +4,11 @@ import { useMutation } from "@tanstack/react-query";
 type CreateRoomResponse = {
   room_id: string;
 };
-async function createRoom(dict_id: string): Promise<CreateRoomResponse> {
+async function createRoom(dict_id?: string): Promise<CreateRoomResponse> {
   return await kyClient
-    .post(`dictionaries/${dict_id}/create-random-room`)
+    .post("rooms", {
+      json: { dictionary_id: dict_id },
+    })
     .json();
 }
 

@@ -18,8 +18,7 @@ export const RoomsScreen = () => {
 
   const createRoom = async () => {
     // TODO: add create room logic
-    const dictionary_id = "def7f59a-e362-44a6-8296-3b4a06b2af01";
-    const { room_id } = await createRoomAsync(dictionary_id);
+    const { room_id } = await createRoomAsync(undefined);
 
     router.push(`/rooms/${room_id}`);
   };

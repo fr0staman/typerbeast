@@ -10,7 +10,7 @@ use uuid::Uuid;
 use crate::{
     AppState,
     app::{auth::Claims, error::MyError, room::RoomStats, types::MyResult},
-    db::models::text::Text,
+    db::models::dictionary::Dictionary,
 };
 
 #[derive(Serialize, utoipa::ToSchema)]
@@ -67,9 +67,11 @@ pub async fn start_room(
     Ok(Json(StartRoomResponse { message: "Countdown started".to_string() }))
 }
 
+// TODO: add more logic, like time start, autostart, user limit etc...
 #[derive(Deserialize, Serialize, utoipa::ToSchema)]
 pub struct CreateRoomRequest {
-    text_id: Uuid,
+    /// If dictionary_id is not provided, the default dictionary will be used
+    dictionary_id: Option<Uuid>,
 }
 
 #[derive(Serialize, utoipa::ToSchema)]
@@ -91,7 +93,14 @@ pub async fn create_room(
     Json(input): Json<CreateRoomRequest>,
 ) -> MyResult<Json<CreateRoomResponse>> {
     let mut conn = state.db().await?;
-    let Some(text) = Text::get_text_by_id(&mut conn, input.text_id).await? else {
+
+    let dict_id = input.dictionary_id.unwrap_or(state.config.default_dictionary_id);
+
+    let Some(dictionary) = Dictionary::get_dictionary_by_id(&mut conn, dict_id).await? else {
+        return Err(MyError::NotFound);
+    };
+
+    let Some(text) = dictionary.get_random_text_in_dictionary(&mut conn).await? else {
         return Err(MyError::NotFound);
     };
 
