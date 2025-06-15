@@ -1,11 +1,13 @@
 import { useQuery } from "@tanstack/react-query";
 import { kyClient } from "@/app/hooks/fetchWithAuth";
+import { UserProfile } from "./useUserProfile";
 
 export type Dictionary = {
   id: string;
   name: string;
-  user_id: string;
+  user: UserProfile;
   created_at: string;
+  text_count: number;
 };
 
 type DictionaryResponse = {

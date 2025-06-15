@@ -2,18 +2,36 @@ use axum::{
     Json,
     extract::{Path, State},
 };
+use chrono::NaiveDateTime;
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;
 
 use crate::{
     AppState,
     app::{auth::Claims, error::MyError, types::MyResult},
-    db::models::{dictionary::Dictionary, text::Text},
+    db::{
+        custom_types::UserRoles,
+        models::{dictionary::Dictionary, text::Text},
+    },
 };
 
 #[derive(Serialize, utoipa::ToSchema)]
+struct UserInfo {
+    username: String,
+    created_at: NaiveDateTime,
+    role: UserRoles,
+}
+#[derive(Serialize, utoipa::ToSchema)]
+struct DictionaryInfo {
+    id: Uuid,
+    name: String,
+    user: UserInfo,
+    created_at: NaiveDateTime,
+    text_count: i64,
+}
+#[derive(Serialize, utoipa::ToSchema)]
 pub struct GetDictionariesResponse {
-    list: Vec<Dictionary>,
+    list: Vec<DictionaryInfo>,
 }
 
 #[utoipa::path(
@@ -30,8 +48,25 @@ pub async fn get_dictionaries(
 ) -> MyResult<Json<GetDictionariesResponse>> {
     let mut conn = state.db().await?;
     let dictionaries = Dictionary::get_dictionaries(&mut conn).await?;
+    let text_counts = Dictionary::get_dictionary_text_count(&mut conn).await?;
 
-    let res = GetDictionariesResponse { list: dictionaries };
+    let info = dictionaries
+        .into_iter()
+        .enumerate()
+        .map(|(i, (dict, user))| DictionaryInfo {
+            id: dict.id,
+            name: dict.name,
+            user: UserInfo {
+                username: user.username,
+                role: user.role,
+                created_at: user.created_at,
+            },
+            created_at: dict.created_at,
+            text_count: text_counts.get(i).map_or(0, |v| v.1),
+        })
+        .collect();
+
+    let res = GetDictionariesResponse { list: info };
 
     Ok(Json(res))
 }

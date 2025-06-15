@@ -6,12 +6,12 @@ use uuid::Uuid;
 
 use crate::{
     app::types::{DbConn, MyResult},
-    db::schema::dictionaries,
+    db::{models::user::User, schema::dictionaries},
 };
 
 use super::text::Text;
 
-#[derive(Queryable, Selectable, Insertable, Debug, Serialize, utoipa::ToSchema)]
+#[derive(Queryable, Selectable, Insertable, Debug, Serialize, utoipa::ToSchema, Clone)]
 #[diesel(table_name = dictionaries)]
 pub struct Dictionary {
     pub id: Uuid,
@@ -27,10 +27,15 @@ impl Dictionary {
         Ok(diesel::insert_into(dictionaries).values(self).get_result(conn).await?)
     }
 
-    pub async fn get_dictionaries(conn: &mut DbConn) -> MyResult<Vec<Dictionary>> {
+    pub async fn get_dictionaries(conn: &mut DbConn) -> MyResult<Vec<(Dictionary, User)>> {
         use crate::db::schema::dictionaries::dsl::*;
+        use crate::db::schema::users;
 
-        let result = dictionaries.select(Dictionary::as_select()).load(conn).await?;
+        let result = dictionaries
+            .inner_join(users::table)
+            .select((Dictionary::as_select(), User::as_select()))
+            .load(conn)
+            .await?;
 
         Ok(result)
     }
@@ -86,6 +91,20 @@ impl Dictionary {
             .first(conn)
             .await
             .optional()?;
+
+        Ok(result)
+    }
+
+    pub async fn get_dictionary_text_count(conn: &mut DbConn) -> MyResult<Vec<(Uuid, i64)>> {
+        use crate::db::schema::texts;
+        use diesel::dsl::count_star;
+
+        let result = dictionaries::table
+            .left_join(texts::table)
+            .group_by(dictionaries::id)
+            .select((dictionaries::id, count_star()))
+            .load(conn)
+            .await?;
 
         Ok(result)
     }
