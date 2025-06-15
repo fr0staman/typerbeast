@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useRef, useState } from "react";
 import {
   Box,
   Input,
@@ -10,14 +10,23 @@ import {
   Heading,
   Text,
   VStack,
+  Link,
+  LinkText,
 } from "@/ui/components";
-import { useRouter } from "solito/navigation";
-import { View } from "react-native";
+import { useLink, useRouter } from "solito/navigation";
+import { TextInput, View } from "react-native";
 import { useLogin } from "@/app/hooks/useLogin";
 
 export function LoginScreen() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+
+  const passwordInputRef = useRef<TextInput>(null);
+
+  const signupLinkProps = useLink({
+    href: "/signup",
+  });
+
   const router = useRouter();
 
   const login = useLogin();
@@ -52,19 +61,27 @@ export function LoginScreen() {
               autoCorrect={false}
               value={email}
               onChangeText={setEmail}
+              onSubmitEditing={() => passwordInputRef.current?.focus()}
             />
           </Input>
 
           <Input>
             <InputField
+              // @ts-expect-error gluestack type bug
+              ref={passwordInputRef}
               placeholder="Password"
               secureTextEntry
               value={password}
               onChangeText={setPassword}
+              onSubmitEditing={onSubmit}
             />
           </Input>
 
-          <Button onPress={onSubmit} isDisabled={login.isPending}>
+          <Button
+            onPress={onSubmit}
+            isDisabled={login.isPending}
+            className="focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
+          >
             <ButtonText>
               {login.isPending ? "Signing in..." : "Login"}
             </ButtonText>
@@ -75,6 +92,11 @@ export function LoginScreen() {
               {login.error.message || "Login failed"}
             </Text>
           )}
+          <Link {...signupLinkProps}>
+            <LinkText className="text-gray-300 hover:text-gray-100 transition">
+              Don't have an account? Register
+            </LinkText>
+          </Link>
         </VStack>
       </Box>
     </View>
