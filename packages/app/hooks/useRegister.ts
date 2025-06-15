@@ -1,5 +1,5 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { PUBLIC_API_URL } from "@/app/store/config";
+import { kyClient } from "./fetchWithAuth";
 
 type RegisterResponse = {
   access_token: string;
@@ -21,15 +21,15 @@ export const useRegister = () => {
       password,
       username,
     }: RegisterRequest): Promise<RegisterResponse> => {
-      const response = await fetch(PUBLIC_API_URL + "/user/signup", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, password, username }),
-      });
-
-      if (!response.ok) throw new Error("Registration failed");
-
-      return response.json();
+      try {
+        return await kyClient
+          .post("user/signup", {
+            json: { email, password, username },
+          })
+          .json();
+      } catch {
+        throw new Error("Registration failed");
+      }
     },
     onSuccess: () => {
       // Update the query client with the new user data

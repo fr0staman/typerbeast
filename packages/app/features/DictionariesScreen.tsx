@@ -19,7 +19,7 @@ export const DictionariesScreen = () => {
     <VStack className="flex-1 p-4 bg-background space-y-4 items-center">
       <VStack className="w-full md:max-w-7xl">
         <FlatList
-          data={dictionaries}
+          data={dictionaries?.list}
           renderItem={({ item }) => <DictionaryItem item={item} />}
         />
       </VStack>

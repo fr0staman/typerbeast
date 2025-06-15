@@ -1,6 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import { PUBLIC_API_URL } from "../store/config";
-import { fetchWithAuth } from "./fetchWithAuth";
+import { kyClient } from "./fetchWithAuth";
 
 export type MeStats = {
   results_count: number;
@@ -11,12 +10,7 @@ export type MeStats = {
 };
 
 async function fetchMeStats(): Promise<MeStats> {
-  const res = await fetchWithAuth(PUBLIC_API_URL + "/user/me/stats");
-  if (!res.ok) {
-    throw new Error("Failed to fetch stats");
-  }
-  const data = await res.json();
-  return data;
+  return await kyClient.get("user/me/stats").json();
 }
 
 export const useMeStats = () =>

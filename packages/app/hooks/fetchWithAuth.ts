@@ -1,14 +1,21 @@
 import { useAuthStore } from "@/app/store/auth";
+import ky from "ky";
+import { PUBLIC_API_URL } from "../store/config";
 
-export async function fetchWithAuth(
-  ...args: Parameters<typeof fetch>
-): ReturnType<typeof fetch> {
-  const token = useAuthStore.getState().token;
-  return fetch(args[0], {
-    ...args[1],
-    headers: {
-      ...args[1]?.headers,
-      Authorization: `Bearer ${token}`,
-    },
-  });
-}
+export const kyClient = ky.create({
+  prefixUrl: PUBLIC_API_URL,
+  hooks: {
+    beforeRequest: [
+      request => {
+        const token = useAuthStore.getState().token;
+        if (token) {
+          request.headers.set("Authorization", `Bearer ${token}`);
+        }
+      },
+    ],
+  },
+  headers: {
+    "Content-Type": "application/json",
+  },
+  throwHttpErrors: true,
+});

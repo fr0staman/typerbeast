@@ -3919,6 +3919,7 @@ __metadata:
     autoprefixer: "npm:^10.4.21"
     dayjs: "npm:^1.11.13"
     eslint: "npm:^9"
+    ky: "npm:^1.8.1"
     nativewind: "npm:^4.1.23"
     postcss: "npm:^8.5.3"
     react: "npm:19.0.0"
@@ -7826,6 +7827,13 @@ __metadata:
   version: 3.0.3
   resolution: "kleur@npm:3.0.3"
   checksum: 10c0/cd3a0b8878e7d6d3799e54340efe3591ca787d9f95f109f28129bdd2915e37807bf8918bb295ab86afb8c82196beec5a1adcaf29042ce3f2bd932b038fe3aa4b
+  languageName: node
+  linkType: hard
+
+"ky@npm:^1.8.1":
+  version: 1.8.1
+  resolution: "ky@npm:1.8.1"
+  checksum: 10c0/48ab4b348dd7d8c6aa0f82df76fa32e99ade3c5513d50f58b0db5b945146deb6d8c18b2a61a0655b08385efa04b3bf1ed4098fff0329e3bd6c670c8a88668d9f
   languageName: node
   linkType: hard
 

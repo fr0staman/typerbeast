@@ -5,8 +5,7 @@ import { FlatList } from "react-native";
 import { useRouter } from "solito/navigation";
 import { useRoomList } from "@/app/hooks/useRoomList";
 import { useRoomCreate } from "@/app/hooks/useRoomCreate";
-import { fetchWithAuth } from "@/app/hooks/fetchWithAuth";
-import { PUBLIC_API_URL } from "@/app/store/config";
+import { kyClient } from "@/app/hooks/fetchWithAuth";
 import { useAppTranslation } from "@/app/i18n/hooks";
 
 export const RoomsScreen = () => {
@@ -14,22 +13,20 @@ export const RoomsScreen = () => {
 
   const router = useRouter();
 
-  const { data: rooms = [] } = useRoomList();
+  const { data: rooms = { rooms: [] } } = useRoomList();
   const { mutateAsync: createRoomAsync } = useRoomCreate();
 
   const createRoom = async () => {
     // TODO: add create room logic
     const dictionary_id = "def7f59a-e362-44a6-8296-3b4a06b2af01";
-    const room_id = await createRoomAsync(dictionary_id);
+    const { room_id } = await createRoomAsync(dictionary_id);
 
     router.push(`/rooms/${room_id}`);
   };
 
   const joinRoom = async (roomId: string) => {
     try {
-      await fetchWithAuth(PUBLIC_API_URL + `/rooms/${roomId}/join`, {
-        method: "POST",
-      });
+      await kyClient.post(`rooms/${roomId}/join`);
       router.push(`/rooms/${roomId}`);
     } catch (err) {
       console.error("Failed to join room", err);
@@ -45,8 +42,7 @@ export const RoomsScreen = () => {
       </Button>
 
       <FlatList
-        data={rooms}
-        keyExtractor={item => item.room_id}
+        data={rooms?.rooms}
         renderItem={({ item }) => (
           <Button
             onPress={() => joinRoom(item.room_id)}

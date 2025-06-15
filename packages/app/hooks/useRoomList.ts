@@ -1,6 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import { PUBLIC_API_URL } from "@/app/store/config";
-import { fetchWithAuth } from "@/app/hooks/fetchWithAuth";
+import { kyClient } from "@/app/hooks/fetchWithAuth";
 
 type RoomStats = {
   room_id: string;
@@ -8,13 +7,12 @@ type RoomStats = {
   started: boolean;
 };
 
-async function fetchRooms(): Promise<RoomStats[]> {
-  const res = await fetchWithAuth(PUBLIC_API_URL + "/rooms");
-  if (!res.ok) {
-    throw new Error("Failed to fetch rooms");
-  }
-  const data = await res.json();
-  return data.rooms; // assuming { rooms: [...] }
+type RoomResponse = {
+  rooms: RoomStats[];
+};
+
+async function fetchRooms(): Promise<RoomResponse> {
+  return await kyClient.get("rooms").json();
 }
 
 export const useRoomList = () =>

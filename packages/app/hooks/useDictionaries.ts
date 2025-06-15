@@ -1,6 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import { PUBLIC_API_URL } from "@/app/store/config";
-import { fetchWithAuth } from "@/app/hooks/fetchWithAuth";
+import { kyClient } from "@/app/hooks/fetchWithAuth";
 
 export type Dictionary = {
   id: string;
@@ -9,13 +8,11 @@ export type Dictionary = {
   created_at: string;
 };
 
-async function fetchRooms(): Promise<Dictionary[]> {
-  const res = await fetchWithAuth(PUBLIC_API_URL + "/dictionaries");
-  if (!res.ok) {
-    throw new Error("Failed to fetch dictionaries");
-  }
-  const data = await res.json();
-  return data.list; // assuming { list: [...] }
+type DictionaryResponse = {
+  list: Dictionary[];
+};
+async function fetchRooms(): Promise<DictionaryResponse> {
+  return await kyClient.get("dictionaries").json();
 }
 
 export const useDictionaries = () =>
