@@ -119,6 +119,7 @@ impl Results {
         use crate::db::schema::room_users;
         use crate::db::schema::rooms;
         use crate::db::schema::texts;
+        use diesel::dsl::avg;
 
         let result = results
             .inner_join(room_users::table.on(room_users::id.eq(room_user_id)))
@@ -127,15 +128,19 @@ impl Results {
             .filter(room_users::user_id.eq(id_user))
             .filter(texts::dictionary_id.eq(id_dictionary))
             .select((
-                diesel::dsl::avg(wpm).assume_not_null(),
-                diesel::dsl::avg(cpm).assume_not_null(),
+                avg(wpm),
+                avg(cpm),
                 // avg(mistakes) -> Numeric, but i cant cast it to double without bigdecimal crate.
-                diesel::dsl::avg(diesel::dsl::sql::<diesel::sql_types::Double>("mistakes::real"))
-                    .assume_not_null(),
+                avg(diesel::dsl::sql::<diesel::sql_types::Double>("mistakes::real")),
             ))
             .first(conn)
             .await
             .optional()?;
+
+        let result = match result {
+            Some((Some(_wpm), Some(_cpm), Some(_mistakes))) => Some((_wpm, _cpm, _mistakes)),
+            _ => None,
+        };
 
         Ok(result)
     }

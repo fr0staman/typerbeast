@@ -1,29 +1,49 @@
 "use client";
 
-import { Text, Button, ButtonText } from "@/ui/components";
-import { View } from "react-native";
-import { useParams, useRouter } from "solito/navigation";
-import { useAppTranslation } from "../i18n/hooks";
+import { Text, VStack } from "@/ui/components";
+import { Loading } from "../components/Loading";
+import dayjs from "dayjs";
+import { useParams } from "solito/navigation";
+import { useUserStats } from "../hooks/useUserStats";
+import { useUserProfile } from "../hooks/useUserProfile";
+import { NotFound } from "../components/NotFound";
 
-export function UserScreen() {
-  const router = useRouter();
-  const { username } = useParams();
+export const UserScreen = () => {
+  const { username } = useParams<{ username: string }>();
 
-  const { t } = useAppTranslation("common");
+  const {
+    data: profile,
+    isLoading,
+    isError: isProfileError,
+  } = useUserProfile(username);
+  const {
+    data: stats,
+    isLoading: statsLoading,
+    isError: isStatsError,
+  } = useUserStats(username);
+
+  if (isLoading || statsLoading) {
+    return <Loading />;
+  }
+
+  if (isStatsError || isProfileError) {
+    return <NotFound />;
+  }
+
+  const date = dayjs(profile?.created_at).format("YYYY-MM-DD");
 
   return (
-    <View className="flex-1 items-center justify-items-center p-8 pb-20 gap-16 sm:p-20 bg-white dark:bg-black">
-      <View className={"flex-1 items-center justify-center"}>
-        <Text size="2xl" className="mt-2">
-          {t("username")}:{" "}
-          <Text bold size="2xl">
-            {username}
-          </Text>
-        </Text>
-        <Button className="mt-6" onPress={() => router.back()}>
-          <ButtonText>{t("goHome")}</ButtonText>
-        </Button>
-      </View>
-    </View>
+    <VStack className="items-center">
+      <VStack className="w-full md:max-w-7xl">
+        <Text size="2xl">{profile?.username}</Text>
+
+        <Text>Date: {date}</Text>
+
+        <Text>Total races: {stats?.results_count}</Text>
+        <Text>Average wpm: {stats?.average_wpm}</Text>
+        <Text>Average cpm: {stats?.average_cpm}</Text>
+        <Text>Average mistakes: {stats?.average_mistakes}</Text>
+      </VStack>
+    </VStack>
   );
-}
+};

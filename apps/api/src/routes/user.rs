@@ -2,7 +2,7 @@ use std::net::SocketAddr;
 
 use axum::{
     Json,
-    extract::{ConnectInfo, State},
+    extract::{ConnectInfo, Path, State},
 };
 use axum_extra::{
     TypedHeader,
@@ -258,6 +258,7 @@ pub async fn me_stats(claims: Claims, state: State<AppState>) -> MyResult<Json<U
 
     let results_count = Results::get_results_count_by_user_id(&mut conn, user.id).await?;
     let last_result = Results::get_last_result_by_user_id(&mut conn, user.id).await?;
+
     let (average_wpm, average_cpm, average_mistakes) =
         Results::get_average_wpm_cpm_mistakes_in_dictionary_by_user_id(
             &mut conn,
@@ -274,6 +275,85 @@ pub async fn me_stats(claims: Claims, state: State<AppState>) -> MyResult<Json<U
         average_cpm,
         average_mistakes,
     };
+
+    Ok(Json(res))
+}
+
+#[derive(Serialize, Deserialize, utoipa::ToSchema)]
+pub struct UserStats {
+    results_count: i64,
+    last_result: Option<Results>,
+    average_wpm: f64,
+    average_cpm: f64,
+    average_mistakes: f64,
+}
+
+// NOTE: this route should have other flow than /user/me/stats, it's okay to be copypasted currently.
+#[utoipa::path(
+    get,
+    path = "/api/v1/user/{username}/stats",
+    responses(
+        (status = 200, description = "Success", body = UserStats),
+        (status = 401, description = "Unauthorized"),
+    )
+)]
+pub async fn user_stats(
+    _: Claims,
+    Path(username): Path<String>,
+    state: State<AppState>,
+) -> MyResult<Json<UserStats>> {
+    let mut conn = state.db().await?;
+
+    let maybe_user = User::get_user_by_username(&mut conn, &username).await?;
+    let Some(user) = maybe_user else { return Err(MyError::NotFound) };
+
+    let results_count = Results::get_results_count_by_user_id(&mut conn, user.id).await?;
+    let last_result = Results::get_last_result_by_user_id(&mut conn, user.id).await?;
+    let (average_wpm, average_cpm, average_mistakes) =
+        Results::get_average_wpm_cpm_mistakes_in_dictionary_by_user_id(
+            &mut conn,
+            state.config.default_dictionary_id,
+            user.id,
+        )
+        .await?
+        .unwrap_or((0.0, 0.0, 0.0));
+
+    let res = UserStats {
+        results_count,
+        last_result: last_result.map(|r| r.0),
+        average_wpm,
+        average_cpm,
+        average_mistakes,
+    };
+
+    Ok(Json(res))
+}
+
+#[derive(Serialize, Deserialize, utoipa::ToSchema)]
+pub struct UserProfileResponse {
+    username: String,
+    created_at: NaiveDateTime,
+}
+
+#[utoipa::path(
+    get,
+    path = "/api/v1/user/{username}/profile",
+    responses(
+        (status = 200, description = "Success", body = UserProfileResponse),
+        (status = 401, description = "Unauthorized"),
+    )
+)]
+pub async fn user_profile(
+    _: Claims,
+    Path(username): Path<String>,
+    state: State<AppState>,
+) -> MyResult<Json<UserProfileResponse>> {
+    let mut conn = state.db().await?;
+
+    let maybe_user = User::get_user_by_username(&mut conn, &username).await?;
+    let Some(user) = maybe_user else { return Err(MyError::NotFound) };
+
+    let res = UserProfileResponse { username: user.username, created_at: user.created_at };
 
     Ok(Json(res))
 }

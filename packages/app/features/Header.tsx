@@ -12,6 +12,10 @@ export const Header = () => {
     href: "/dictionaries",
   });
 
+  const homeLinkProps = useLink({
+    href: "/",
+  });
+
   return (
     <HStack className="justify-center px-4 py-3 dark:bg-gray-800 items-center">
       <HStack space="xl" className="w-full md:max-w-7xl items-center">
@@ -27,9 +31,11 @@ export const Header = () => {
             borderRadius={24}
           />
           */}
-          <Text size="md" bold>
-            TYPERBEAST
-          </Text>
+          <Link {...homeLinkProps}>
+            <Text size="md" bold>
+              TYPERBEAST
+            </Text>
+          </Link>
         </HStack>
 
         <HStack space="lg" className="flex-1 items-center">

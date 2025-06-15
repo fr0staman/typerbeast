@@ -47,4 +47,15 @@ impl User {
 
         Ok(diesel::insert_into(users).values(self).get_result(conn).await?)
     }
+
+    pub async fn get_user_by_username(
+        conn: &mut DbConn,
+        user_username: &str,
+    ) -> MyResult<Option<User>> {
+        use crate::db::schema::users::dsl::*;
+
+        let result = users.filter(username.eq(user_username)).first(conn).await.optional()?;
+
+        Ok(result)
+    }
 }
