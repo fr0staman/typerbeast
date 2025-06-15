@@ -4,6 +4,7 @@ use serde::{Deserialize, Serialize};
     diesel_derive_enum::DbEnum, PartialEq, Debug, Serialize, Deserialize, Clone, utoipa::ToSchema,
 )]
 #[db_enum(existing_type_path = "crate::db::schema::sql_types::ReviewTextStatus")]
+#[serde(rename_all = "lowercase")]
 pub enum ReviewTextStatus {
     Pending,
     Approved,
@@ -14,6 +15,7 @@ pub enum ReviewTextStatus {
     diesel_derive_enum::DbEnum, PartialEq, Debug, Serialize, Deserialize, Clone, utoipa::ToSchema,
 )]
 #[db_enum(existing_type_path = "crate::db::schema::sql_types::UserRoles")]
+#[serde(rename_all = "lowercase")]
 pub enum UserRoles {
     Creator,
     Moderator,
@@ -24,6 +26,7 @@ pub enum UserRoles {
     diesel_derive_enum::DbEnum, PartialEq, Debug, Serialize, Deserialize, Clone, utoipa::ToSchema,
 )]
 #[db_enum(existing_type_path = "crate::db::schema::sql_types::Leagues")]
+#[serde(rename_all = "lowercase")]
 pub enum Leagues {
     Mobile,
     Web,

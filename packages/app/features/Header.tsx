@@ -12,6 +12,10 @@ export const Header = () => {
     href: "/dictionaries",
   });
 
+  const leaderboardLinkProps = useLink({
+    href: "/leaderboard",
+  });
+
   const homeLinkProps = useLink({
     href: "/",
   });
@@ -41,6 +45,10 @@ export const Header = () => {
         <HStack space="lg" className="flex-1 items-center">
           <Link {...dictionariesLinkProps}>
             <LinkText>Dictionaries</LinkText>
+          </Link>
+
+          <Link {...leaderboardLinkProps}>
+            <LinkText>Leaderboard</LinkText>
           </Link>
         </HStack>
 

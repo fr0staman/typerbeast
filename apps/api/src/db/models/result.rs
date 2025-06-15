@@ -1,4 +1,4 @@
-use chrono::NaiveDateTime;
+use chrono::{Duration, NaiveDateTime, Utc};
 use diesel::prelude::*;
 use diesel_async::RunQueryDsl;
 use serde::{Deserialize, Serialize};
@@ -6,7 +6,7 @@ use uuid::Uuid;
 
 use crate::{
     app::types::{DbConn, MyResult},
-    db::{models::room_user::RoomUser, schema::results},
+    db::{custom_types::Leagues, models::room_user::RoomUser, schema::results},
 };
 
 #[derive(Serialize, Deserialize, Debug, Clone, utoipa::ToSchema)]
@@ -56,6 +56,38 @@ pub struct Results {
     pub cpm: f32,
     pub stats: ResultStats,
     pub room_user_id: Uuid,
+}
+
+#[derive(Deserialize, utoipa::ToSchema, utoipa::IntoParams)]
+pub struct TopQuery {
+    // If not provided, defaults to default dictionary
+    pub dictionary_id: Option<Uuid>,
+    // If not provided - not filtered
+    pub league: Option<Leagues>,
+    #[serde(default)]
+    pub period: Period,
+}
+
+#[derive(Default, Deserialize, utoipa::ToSchema)]
+#[serde(rename_all = "lowercase")]
+pub enum Period {
+    Day,
+    Week,
+    Month,
+    #[default]
+    AllTime,
+}
+
+#[derive(Queryable, Serialize, utoipa::ToSchema)]
+pub struct TopUser {
+    pub user_id: Uuid,
+    pub username: String,
+    pub room_id: Uuid,
+    pub id: Uuid,
+    pub wpm: f32,
+    pub cpm: f32,
+    pub mistakes: i16,
+    pub achieved_at: chrono::NaiveDateTime,
 }
 
 impl Results {
@@ -143,5 +175,51 @@ impl Results {
         };
 
         Ok(result)
+    }
+
+    pub async fn get_leaderboard(conn: &mut DbConn, params: TopQuery) -> MyResult<Vec<TopUser>> {
+        use crate::db::schema::results;
+        use crate::db::schema::room_users;
+        use crate::db::schema::rooms;
+        use crate::db::schema::texts;
+        use crate::db::schema::users;
+
+        let mut query = results::table
+            .inner_join(room_users::table.on(room_users::id.eq(results::room_user_id)))
+            .inner_join(rooms::table.on(rooms::id.eq(room_users::room_id)))
+            .inner_join(texts::table.on(texts::id.eq(rooms::text_id)))
+            .inner_join(users::table.on(users::id.eq(room_users::user_id)))
+            .distinct_on(users::id)
+            .select((
+                users::id,
+                users::username,
+                room_users::room_id,
+                results::id,
+                results::wpm,
+                results::cpm,
+                results::mistakes,
+                results::end_time,
+            ))
+            .into_boxed();
+
+        if let Some(dict_id) = params.dictionary_id {
+            query = query.filter(texts::dictionary_id.eq(dict_id));
+        }
+
+        if let Some(league) = params.league {
+            use crate::db::schema::room_users::dsl::league as room_league;
+            query = query.filter(room_league.eq(league));
+        }
+
+        if let Some(start_time) = match params.period {
+            Period::Day => Some(Utc::now() - Duration::hours(24)),
+            Period::Week => Some(Utc::now() - Duration::days(7)),
+            Period::Month => Some(Utc::now() - Duration::days(30)),
+            Period::AllTime => None,
+        } {
+            query = query.filter(results::end_time.gt(start_time.naive_utc()));
+        }
+
+        Ok(query.order_by((users::id, results::wpm.desc())).limit(10).load(conn).await?)
     }
 }
