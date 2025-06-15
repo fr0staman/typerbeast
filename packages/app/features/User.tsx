@@ -1,6 +1,6 @@
 "use client";
 
-import { Text, VStack } from "@/ui/components";
+import { Box, Heading, HStack, Text, VStack } from "@/ui/components";
 import { Loading } from "../components/Loading";
 import dayjs from "dayjs";
 import { useParams } from "solito/navigation";
@@ -33,16 +33,47 @@ export const UserScreen = () => {
   const date = dayjs(profile?.created_at).format("YYYY-MM-DD");
 
   return (
-    <VStack className="items-center">
-      <VStack className="w-full md:max-w-7xl">
-        <Text size="2xl">{profile?.username}</Text>
+    <VStack className="items-center text-gray-200 px-6 py-10">
+      <VStack className="w-full md:max-w-7xl mx-auto space-y-6">
+        <HStack className="flex items-center justify-between border-b border-gray-700 pb-4">
+          <Box>
+            <Text size="3xl" className="font-bold">
+              {profile?.username}
+            </Text>
 
-        <Text>Date: {date}</Text>
+            <Text className="text-sm text-gray-400">Joined: {date}</Text>
+          </Box>
+        </HStack>
 
-        <Text>Total races: {stats?.results_count}</Text>
-        <Text>Average wpm: {stats?.average_wpm}</Text>
-        <Text>Average cpm: {stats?.average_cpm}</Text>
-        <Text>Average mistakes: {stats?.average_mistakes}</Text>
+        <Box className="bg-gray-800 rounded-lg p-6 shadow space-y-2">
+          <Heading as="h2" className="text-xl font-semibold mb-2">
+            Typing Stats
+          </Heading>
+          <Text>
+            Total races:{" "}
+            <Text className="font-semibold">
+              {stats?.results_count?.toFixed(2)}
+            </Text>
+          </Text>
+          <Text>
+            Average wpm:{" "}
+            <Text className="font-semibold">
+              {stats?.average_wpm?.toFixed(2)}
+            </Text>
+          </Text>
+          <Text>
+            Average cpm:{" "}
+            <Text className="font-semibold">
+              {stats?.average_cpm?.toFixed(2)}
+            </Text>
+          </Text>
+          <Text>
+            Average mistakes:{" "}
+            <Text className="font-semibold">
+              {stats?.average_mistakes?.toFixed(2)}
+            </Text>
+          </Text>
+        </Box>
       </VStack>
     </VStack>
   );
