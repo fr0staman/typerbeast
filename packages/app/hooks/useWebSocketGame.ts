@@ -36,7 +36,7 @@ enum PlayerStatus {
 }
 
 type PlayerStats = {
-  id: string;
+  username: string;
   mistakes: number;
   progress: number;
   status: PlayerStatus;
@@ -153,6 +153,7 @@ export const useWebSocketGame = (room_id: string) => {
     loading,
     countdown,
     players,
+    startTime,
     makeForceStart,
     sendKeystroke,
   };

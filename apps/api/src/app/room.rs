@@ -1,7 +1,7 @@
 use std::{collections::HashMap, sync::Arc};
 
 use axum::extract::ws::Message;
-use chrono::{DateTime, Duration, Utc};
+use chrono::{DateTime, Duration, NaiveDateTime, Utc};
 use serde::{Deserialize, Serialize};
 use tokio::sync::{RwLock, mpsc::UnboundedSender, watch};
 use uuid::Uuid;
@@ -9,13 +9,14 @@ use uuid::Uuid;
 use crate::{
     app::types::DbPool,
     db::{
-        custom_types::Leagues,
+        custom_types::{Leagues, UserRoles},
         models::{
             dictionary::Dictionary,
             result::{Keystroke, ResultStats, Results},
             room::Room as RoomModel,
             room_user::RoomUser,
             text::Text,
+            user::User,
         },
     },
 };
@@ -46,7 +47,7 @@ pub enum PlayerStatus {
 
 #[derive(Serialize, Deserialize, Debug)]
 pub struct PlayerStats {
-    pub id: Uuid,
+    pub username: String,
     pub mistakes: i16,
     pub progress: f32,
     pub status: PlayerStatus,
@@ -60,7 +61,7 @@ pub struct RoomStats {
     pub dictionary: Dictionary,
 }
 
-#[derive(Debug, Clone, Serialize)]
+#[derive(Clone, Serialize)]
 pub struct Room {
     pub id: Uuid,
     pub text: Text,
@@ -72,9 +73,17 @@ pub struct Room {
     pub start_notifier: watch::Sender<bool>,
 }
 
-#[derive(Clone, Serialize, Debug)]
+#[derive(Serialize, Deserialize, utoipa::ToSchema, Clone)]
+pub struct UserInfo {
+    username: String,
+    created_at: NaiveDateTime,
+    role: UserRoles,
+}
+
+#[derive(Clone, Serialize)]
 pub struct Player {
     pub id: Uuid,
+    pub user: UserInfo,
     pub room_user_id: Uuid,
     #[serde(skip_deserializing, skip_serializing)]
     pub sender: UnboundedSender<Message>, // axum::extract::ws::WebSocketSender,
@@ -148,9 +157,9 @@ impl RoomsManager {
 
                 let stats = room
                     .players
-                    .iter()
-                    .map(|(k, v)| PlayerStats {
-                        id: *k,
+                    .values()
+                    .map(|v| PlayerStats {
+                        username: v.user.username.clone(),
                         mistakes: v.mistakes,
                         progress: v.progress,
                         status: v.status.clone(),
@@ -186,7 +195,7 @@ impl RoomsManager {
     pub async fn join_room(
         &self,
         room_id: Uuid,
-        player_id: Uuid,
+        user: User,
         sender: UnboundedSender<Message>,
     ) -> MyResult<()> {
         let Some(room) = self._get_room(room_id).await else {
@@ -199,7 +208,12 @@ impl RoomsManager {
         let room_user_id = Uuid::new_v4();
 
         let live_player = Player {
-            id: player_id,
+            id: user.id,
+            user: UserInfo {
+                username: user.username,
+                created_at: user.created_at,
+                role: user.role,
+            },
             room_user_id,
             sender,
             status: PlayerStatus::Idle,
@@ -214,7 +228,7 @@ impl RoomsManager {
         let player_model = RoomUser {
             id: room_user_id,
             room_id,
-            user_id: player_id,
+            user_id: live_player.id,
             joined_at: chrono::Utc::now().naive_utc(),
             left_at: chrono::Utc::now().naive_utc(),
             league: Leagues::Web,
@@ -224,14 +238,14 @@ impl RoomsManager {
 
         let _ = player_model.insert_room_user(&mut conn).await;
         let mut room = room.write().await;
-        room.players.insert(player_id, live_player);
+        room.players.insert(live_player.id, live_player);
 
         let room = room.downgrade();
         let users = room
             .players
-            .iter()
-            .map(|(id, player)| PlayerStats {
-                id: *id,
+            .values()
+            .map(|player| PlayerStats {
+                username: player.user.username.clone(),
                 mistakes: player.mistakes,
                 progress: player.progress,
                 status: player.status.clone(),
@@ -495,9 +509,9 @@ impl RoomsManager {
 
         let users = room
             .players
-            .iter()
-            .map(|(id, player)| PlayerStats {
-                id: *id,
+            .values()
+            .map(|player| PlayerStats {
+                username: player.user.username.clone(),
                 mistakes: player.mistakes,
                 status: player.status.clone(),
                 progress: player.progress,

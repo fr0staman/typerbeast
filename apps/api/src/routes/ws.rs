@@ -12,9 +12,9 @@ use std::net::SocketAddr;
 use tokio::sync::mpsc;
 use uuid::Uuid;
 
-use crate::app::auth::Claims;
 use crate::app::state::AppState;
 use crate::app::{error::MyError, room::WsMessage};
+use crate::{app::auth::Claims, db::models::user::User};
 
 #[utoipa::path(
     get,
@@ -52,7 +52,15 @@ async fn handle_socket(
 ) {
     let (tx, mut rx) = mpsc::unbounded_channel();
 
-    let _ = state.rooms_manager.join_room(room_id, claims.sub, tx).await;
+    let mut conn = state.db().await.unwrap();
+
+    let Ok(Some(user)) = User::get_user(&mut conn, claims.sub).await else {
+        log::error!("User not found");
+        return;
+    };
+
+    drop(conn);
+    let _ = state.rooms_manager.join_room(room_id, user, tx).await;
 
     let (mut ws_sender, mut ws_receiver) = ws.split();
 

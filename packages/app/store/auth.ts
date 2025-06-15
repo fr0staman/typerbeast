@@ -3,7 +3,6 @@ import { createJSONStorage, persist } from "zustand/middleware";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
 export type User = {
-  id: string;
   username: string;
   email: string;
   created_at: string;

@@ -8,7 +8,7 @@ use crate::{
     db::{custom_types::UserRoles, schema::users},
 };
 
-#[derive(Queryable, Selectable, Insertable, Debug)]
+#[derive(Queryable, Selectable, Insertable, Debug, Clone)]
 #[diesel(table_name = users)]
 pub struct User {
     pub id: Uuid,

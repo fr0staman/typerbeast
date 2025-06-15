@@ -123,6 +123,7 @@ pub struct ProfileResponse {
     username: String,
     email: String,
     created_at: NaiveDateTime,
+    role: UserRoles,
 }
 
 #[utoipa::path(
@@ -144,6 +145,7 @@ pub async fn profile(claims: Claims, state: State<AppState>) -> MyResult<Json<Pr
         email: user.email,
         created_at: user.created_at,
         id: user.id,
+        role: user.role,
     };
 
     Ok(Json(res))
@@ -333,6 +335,7 @@ pub async fn user_stats(
 pub struct UserProfileResponse {
     username: String,
     created_at: NaiveDateTime,
+    role: UserRoles,
 }
 
 #[utoipa::path(
@@ -353,7 +356,11 @@ pub async fn user_profile(
     let maybe_user = User::get_user_by_username(&mut conn, &username).await?;
     let Some(user) = maybe_user else { return Err(MyError::NotFound) };
 
-    let res = UserProfileResponse { username: user.username, created_at: user.created_at };
+    let res = UserProfileResponse {
+        username: user.username,
+        created_at: user.created_at,
+        role: user.role,
+    };
 
     Ok(Json(res))
 }

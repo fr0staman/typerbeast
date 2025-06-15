@@ -11,9 +11,10 @@ import {
   InputField,
   ButtonText,
   ProgressFilledTrack,
+  HStack,
 } from "@/ui/components";
 import { useCallback, useEffect, useRef, useState } from "react";
-import { useParams, useRouter } from "solito/navigation";
+import { useParams } from "solito/navigation";
 import { useWebSocketGame } from "@/app/hooks/useWebSocketGame"; // Import custom hook
 import { useAppTranslation } from "@/app/i18n/hooks";
 import { useSession } from "@/app/hooks/useSession";
@@ -33,12 +34,12 @@ export const TypingGame = () => {
     sendKeystroke,
     makeForceStart,
     players,
+    startTime,
   } = useWebSocketGame(room_id);
 
   const [userInput, setUserInput] = useState("");
   const inputRef = useRef<HTMLInputElement>(null);
   const { t } = useAppTranslation("typeText");
-  const router = useRouter();
 
   useEffect(() => {
     if (countdown === null) {
@@ -52,20 +53,16 @@ export const TypingGame = () => {
     sendKeystroke(nextChar);
   };
 
-  const resetGame = () => {
-    router.replace(`/rooms/${room_id}`);
-  };
-
   const TextWithHighlight = useCallback(
     function TextWithHighlight() {
       return textToType.split("").map((char, index) => {
         const typedChar = userInput[index];
         const isCorrect = typedChar === char;
         const className = isCorrect
-          ? "text-green-600"
+          ? "text-green-500 font-medium"
           : typedChar
-            ? "text-red-600"
-            : "text-gray-600";
+            ? "text-red-500 font-medium"
+            : "text-gray-400";
         return (
           <Text key={index} className={className}>
             {char}
@@ -77,36 +74,37 @@ export const TypingGame = () => {
   );
 
   return (
-    <Box className="flex-1 flex-col items-center justify-start p-6">
-      <Box className="flex w-full justify-between mb-4">
-        {countdown === null && (
-          <Button onPress={() => makeForceStart(room_id)} className="mt-2">
-            <ButtonText>{t("start")}</ButtonText>
-          </Button>
-        )}
-        {countdown !== null && (
-          <Text className="text-lg text-blue-600">
-            {t("startsIn", { countdown })}
-          </Text>
-        )}
-      </Box>
+    <VStack className="px-4 py-10 items-center space-y-6">
+      <VStack className="w-full md:max-w-7xl mx-auto items-center space-y-8">
+        <Box className="space-y-4 text-center mb-4">
+          {countdown === null && !startTime && (
+            <Button onPress={() => makeForceStart(room_id)}>
+              <ButtonText>{t("start")}</ButtonText>
+            </Button>
+          )}
+          {countdown !== null && (
+            <Text className="text-lg text-blue-600">
+              {t("startsIn", { countdown })}
+            </Text>
+          )}
+        </Box>
 
-      <VStack className="w-full max-w-md space-y-6">
-        <Box className="w-full min-h-[100px] rounded-md border border-gray-300 p-4">
+        <Box className="w-full max-w-xl border border-gray-600 rounded p-4 bg-gray-900 text-lg font-mono leading-relaxed">
           <Skeleton isLoaded={!loading} className="h-[20px] w-full" />
           {!loading && (
-            <Text className="text-base leading-relaxed break-words">
+            <Text>
               <TextWithHighlight />
             </Text>
           )}
         </Box>
 
         <Input
-          className="mt-4"
+          className="w-full max-w-xl bg-black border border-gray-500 rounded px-4 py-2 text-white text-lg font-mono focus:outline-none focus:ring-2 focus:ring-blue-600"
           size="lg"
           isDisabled={loading || countdown !== null || finished}
         >
           <InputField
+            type="text"
             // @ts-expect-error gluestack ref typing bug
             ref={inputRef}
             value={userInput}
@@ -116,37 +114,33 @@ export const TypingGame = () => {
           />
         </Input>
 
-        <Progress value={progress} size="md" className="w-full mt-4">
+        <Progress value={progress} size="md" className="max-w-xl mt-4">
           <ProgressFilledTrack />
         </Progress>
-        <Box>
-          {players.map(player => (
-            <Text key={player.id} className="text-center">
-              {player.id}:{" "}
-              {data?.id === player.id
-                ? progress.toFixed(1)
-                : player.progress.toFixed(1)}
-              %
-            </Text>
-          ))}
-        </Box>
-        <Text className="mt-2 text-center">
-          {t("progressWith", { progress: progress.toFixed(1) })}
-        </Text>
-        <Text className="text-center">{t("mistakesWith", { mistakes })}</Text>
-        <Text className="text-center">
-          {t("speedWith", { speed: speed.toFixed(1) })}
-        </Text>
 
-        {finished && (
-          <Box className="flex flex-col items-center mt-6 space-y-2">
-            <Text className="text-lg text-green-600">{t("finished")}</Text>
-            <Button onPress={resetGame} className="mt-2">
-              <ButtonText>{t("restart")}</ButtonText>
-            </Button>
-          </Box>
-        )}
+        <VStack className="w-full max-w-xl space-y-2 justify-between text-sm font-mono text-gray-300">
+          {players.map(player => (
+            <HStack
+              key={player.username}
+              className="flex justify-between items-center"
+            >
+              <Text className="">{player.username} </Text>
+              <Text className="text-gray-100 animate-pulse">
+                {data?.username === player.username
+                  ? progress.toFixed(1)
+                  : player.progress.toFixed(1)}
+                %
+              </Text>
+            </HStack>
+          ))}
+        </VStack>
+
+        <VStack className="justify-center text-center text-sm text-gray-300 pt-6 border-t border-gray-700">
+          <Text>{t("progressWith", { progress: progress.toFixed(1) })}</Text>
+          <Text>{t("mistakesWith", { mistakes })}</Text>
+          <Text>{t("speedWith", { speed })}</Text>
+        </VStack>
       </VStack>
-    </Box>
+    </VStack>
   );
 };
