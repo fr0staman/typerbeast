@@ -1,5 +1,4 @@
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
-import { HomeScreen } from "@/app/features/Home";
 import { UserScreen } from "@/app/features/User";
 import { TypingGame } from "@/app/features/TypeText";
 import { useAppTranslation } from "@/app/i18n/hooks";
@@ -10,6 +9,7 @@ import { SignupScreen } from "@/app/features/SignupScreen";
 import { DictionariesScreen } from "../features/DictionariesScreen";
 import { DictionaryScreen } from "../features/DictionaryScreen";
 import { ProfileScreen } from "../features/ProfileScreen";
+import { RoomsScreen } from "../features/RoomsScreen";
 
 const Stack = createNativeStackNavigator<{
   login: undefined;
@@ -53,7 +53,7 @@ export function MainNavigator() {
     <Stack.Navigator>
       <Stack.Screen
         name="home"
-        component={HomeScreen}
+        component={RoomsScreen}
         options={{
           headerShown: false,
         }}

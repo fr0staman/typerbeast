@@ -1,10 +1,12 @@
 import { useQuery } from "@tanstack/react-query";
 import { kyClient } from "@/app/hooks/fetchWithAuth";
+import type { Dictionary } from "./useDictionaries";
 
-type RoomStats = {
+export type RoomStats = {
   room_id: string;
   players: number;
   started: boolean;
+  dictionary: Dictionary;
 };
 
 type RoomResponse = {

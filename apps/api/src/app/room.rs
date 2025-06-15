@@ -11,6 +11,7 @@ use crate::{
     db::{
         custom_types::Leagues,
         models::{
+            dictionary::Dictionary,
             result::{Keystroke, ResultStats, Results},
             room::Room as RoomModel,
             room_user::RoomUser,
@@ -56,12 +57,14 @@ pub struct RoomStats {
     pub room_id: Uuid,
     pub players: usize,
     pub started: bool,
+    pub dictionary: Dictionary,
 }
 
 #[derive(Debug, Clone, Serialize)]
 pub struct Room {
     pub id: Uuid,
     pub text: Text,
+    pub dictionary: Dictionary,
     pub players: HashMap<Uuid, Player>,
     pub started: bool,
     pub start_time: DateTime<Utc>,
@@ -95,13 +98,14 @@ impl RoomsManager {
         Self { db, rooms: Arc::new(RwLock::new(HashMap::new())) }
     }
 
-    pub async fn create_room(&self, text: Text) -> Uuid {
+    pub async fn create_room(&self, text: Text, dictionary: Dictionary) -> Uuid {
         let (start_notifier, _) = watch::channel(false);
         let id = Uuid::new_v4();
 
         let room = Room {
             id,
             text,
+            dictionary,
             players: HashMap::new(),
             started: false,
             start_time: chrono::Utc::now(),
@@ -166,8 +170,12 @@ impl RoomsManager {
         let mut list = vec![];
         for i in rooms.values() {
             let room = i.read().await;
-            let stats =
-                RoomStats { room_id: room.id, players: room.players.len(), started: room.started };
+            let stats = RoomStats {
+                room_id: room.id,
+                players: room.players.len(),
+                started: room.started,
+                dictionary: room.dictionary.clone(),
+            };
 
             list.push(stats);
         }
