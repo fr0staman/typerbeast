@@ -20,7 +20,7 @@ async fn main() {
 
     let state = AppState { pool, rooms_manager, config };
 
-    let ip = [0, 0, 0, 0];
+    let ip = [127, 0, 0, 1];
     let port = 9999;
     let addr = SocketAddr::from((ip, port));
 
