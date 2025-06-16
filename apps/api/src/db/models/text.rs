@@ -18,6 +18,7 @@ pub struct Text {
     pub title: String,
     pub content: String,
     pub created_at: NaiveDateTime,
+    pub author_id: Uuid,
 }
 
 impl Text {

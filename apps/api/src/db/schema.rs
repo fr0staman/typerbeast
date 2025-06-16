@@ -97,6 +97,7 @@ diesel::table! {
         title -> Varchar,
         content -> Text,
         created_at -> Timestamp,
+        author_id -> Uuid,
     }
 }
 
@@ -124,6 +125,7 @@ diesel::joinable!(room_users -> users (user_id));
 diesel::joinable!(rooms -> texts (text_id));
 diesel::joinable!(sessions -> users (user_id));
 diesel::joinable!(texts -> dictionaries (dictionary_id));
+diesel::joinable!(texts -> users (author_id));
 
 diesel::allow_tables_to_appear_in_same_query!(
     dictionaries,

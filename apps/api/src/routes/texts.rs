@@ -96,6 +96,7 @@ pub async fn insert_text(
             title: pending_text.title.clone(),
             content: pending_text.content.clone(),
             created_at,
+            author_id: pending_text.author_id,
         };
 
         new_text.insert_text(&mut conn).await?;
@@ -154,6 +155,7 @@ pub async fn review_pending_text(
             title: pending_text.title.clone(),
             dictionary_id: pending_text.dictionary_id,
             created_at: pending_text.created_at,
+            author_id: pending_text.author_id,
         };
 
         new_text.insert_text(&mut conn).await?;
