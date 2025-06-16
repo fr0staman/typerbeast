@@ -11,7 +11,7 @@ use crate::{
     app::{auth::Claims, error::MyError, types::MyResult},
     db::{
         custom_types::UserRoles,
-        models::{dictionary::Dictionary, text::Text},
+        models::{dictionary::Dictionary, text::Text, user::User},
     },
 };
 
@@ -107,7 +107,7 @@ pub async fn add_dictionary(
 
 #[derive(Serialize, utoipa::ToSchema)]
 pub struct GetTextsInDictionaryResponse {
-    dictionary: Dictionary,
+    dictionary: DictionaryInfo,
     list: Vec<Text>,
 }
 
@@ -128,6 +128,19 @@ pub async fn get_texts_in_dictionary(
     let dictionary =
         Dictionary::get_dictionary_by_id(&mut conn, dict_id).await?.ok_or(MyError::NotFound)?;
     let texts = dictionary.get_texts_in_dictionary(&mut conn).await?;
+    let author = User::get_user(&mut conn, dictionary.user_id).await?.ok_or(MyError::NotFound)?;
+
+    let dictionary = DictionaryInfo {
+        id: dictionary.id,
+        name: dictionary.name,
+        user: UserInfo {
+            username: author.username,
+            role: author.role,
+            created_at: author.created_at,
+        },
+        created_at: dictionary.created_at,
+        text_count: texts.len() as i64,
+    };
 
     let res = GetTextsInDictionaryResponse { dictionary, list: texts };
 
