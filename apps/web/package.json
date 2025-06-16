@@ -3,9 +3,9 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "next dev",
-    "build": "next build",
-    "start": "next start",
+    "dev": "DARK_MODE=class next dev",
+    "build": "DARK_MODE=class next build",
+    "start": "DARK_MODE=class next start",
     "lint": "next lint"
   },
   "dependencies": {

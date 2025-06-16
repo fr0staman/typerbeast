@@ -111,7 +111,7 @@ const RoomItem = ({ item }: RoomItem) => {
 
 const RoomsEmpty = () => {
   return (
-    <Box className="p-4 rounded-2xl border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-900 shadow">
+    <Box className="p-4 rounded-2xl border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-900">
       <Text className="text-sm text-gray-500 dark:text-gray-400">
         No rooms found.
       </Text>

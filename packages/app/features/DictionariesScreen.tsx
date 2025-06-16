@@ -56,7 +56,7 @@ export const DictionaryItem = ({ item }: DictionaryItem) => {
   });
 
   return (
-    <Box className="bg-gray-800 border border-gray-700 rounded-lg p-5 shadow mb-6">
+    <Box className="bg-white dark:bg-gray-800 border border-gray-700 rounded-lg p-5 shadow mb-6">
       <HStack className="flex items-center justify-between">
         <Link {...toDictionaryLinks}>
           <Heading
@@ -71,18 +71,19 @@ export const DictionaryItem = ({ item }: DictionaryItem) => {
         </Button>
       </HStack>
 
-      <Box className="mt-3 text-sm text-gray-400  space-y-1">
+      <Box className="mt-3 text-sm text-gray-500 dark:text-gray-400  space-y-1">
         <HStack>
-          <Text className="text-gray-300">Author: </Text>
+          <Text className="text-gray-500 dark:text-gray-400">Author: </Text>
           <Link {...toUserLink}>
             <LinkText>{item.user.username}</LinkText>
           </Link>
         </HStack>
         <Text>
-          <Text className="text-gray-300">Created:</Text> {item.created_at}
+          <Text className="text-gray-500 dark:text-gray-400">Created:</Text>{" "}
+          {item.created_at}
         </Text>
         <Text>
-          <Text className="text-gray-300">Text count: </Text>
+          <Text className="text-gray-500 dark:text-gray-400">Text count: </Text>
           {item.text_count}
         </Text>
       </Box>

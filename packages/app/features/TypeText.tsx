@@ -89,7 +89,7 @@ export const TypingGame = () => {
           )}
         </Box>
 
-        <Box className="w-full max-w-xl border border-gray-600 rounded p-4 bg-gray-900 text-lg font-mono leading-relaxed">
+        <Box className="w-full max-w-xl border border-gray-600 rounded p-4 bg-white dark:bg-gray-900 text-lg font-mono leading-relaxed">
           <Skeleton isLoaded={!loading} className="h-[20px] w-full" />
           {!loading && (
             <Text>
@@ -99,7 +99,7 @@ export const TypingGame = () => {
         </Box>
 
         <Input
-          className="w-full max-w-xl bg-black border border-gray-500 rounded px-4 py-2 text-white text-lg font-mono focus:outline-none focus:ring-2 focus:ring-blue-600"
+          className="w-full max-w-xl bg-white dark:bg-black border border-gray-500 rounded px-4 py-2 text-gray-500 dark:text-white text-lg font-mono focus:outline-none focus:ring-2 focus:ring-blue-600"
           size="lg"
           isDisabled={loading || countdown !== null || finished}
         >
@@ -125,7 +125,7 @@ export const TypingGame = () => {
               className="flex justify-between items-center"
             >
               <Text className="">{player.username} </Text>
-              <Text className="text-gray-100 animate-pulse">
+              <Text className="text-gray-600 dark:text-gray-100 animate-pulse">
                 {data?.username === player.username
                   ? progress.toFixed(1)
                   : player.progress.toFixed(1)}
@@ -135,7 +135,7 @@ export const TypingGame = () => {
           ))}
         </VStack>
 
-        <VStack className="justify-center text-center text-sm text-gray-300 pt-6 border-t border-gray-700">
+        <VStack className="justify-center text-center text-sm text-gray-600 dark:text-gray-100 pt-6 border-t border-gray-700">
           <Text>{t("progressWith", { progress: progress.toFixed(1) })}</Text>
           <Text>{t("mistakesWith", { mistakes })}</Text>
           <Text>{t("speedWith", { speed })}</Text>

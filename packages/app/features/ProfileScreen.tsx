@@ -33,8 +33,10 @@ export const ProfileScreen = () => {
               {profile?.username}
             </Text>
 
-            <Text className="text-sm text-gray-400">Joined: {date}</Text>
-            <Text className="text-sm text-gray-400">
+            <Text className="text-sm text-gray-500 dark:text-gray-400">
+              Joined: {date}
+            </Text>
+            <Text className="text-sm text-gray-500 dark:text-gray-400">
               Email: {profile?.email}
             </Text>
           </Box>
@@ -45,7 +47,7 @@ export const ProfileScreen = () => {
           </HStack>
         </HStack>
 
-        <Box className="bg-gray-800 rounded-lg p-6 shadow space-y-2">
+        <Box className="bg-white dark:bg-gray-800 rounded-lg p-6 shadow space-y-2">
           <Heading as="h2" className="text-xl font-semibold mb-2">
             Typing Stats
           </Heading>
