@@ -70,9 +70,7 @@ export const ProfileScreen = () => {
           </Heading>
           <Text>
             Total races:{" "}
-            <Text className="font-semibold">
-              {stats?.results_count?.toFixed(2)}
-            </Text>
+            <Text className="font-semibold">{stats?.results_count}</Text>
           </Text>
           <Text>
             Average wpm:{" "}
