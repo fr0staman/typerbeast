@@ -1,5 +1,6 @@
 import { cookies } from "next/headers";
 import { PUBLIC_API_URL } from "@/app/store/config";
+import { User } from "../store/auth";
 
 export const COOKIE_NAME = "typerbeast-api_token";
 
@@ -14,5 +15,5 @@ export async function getServerUser() {
   });
 
   if (!res.ok) return null;
-  return await res.json();
+  return (await res.json()) as User;
 }

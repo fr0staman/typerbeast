@@ -24,7 +24,7 @@ const nextConfig: NextConfig = {
     ],
   },
   */
-  webpack: config => {
+  webpack: (config, { webpack }) => {
     config.resolve.alias = {
       ...(config.resolve.alias || {}),
       // Transform all direct `react-native` imports to `react-native-web`
@@ -37,6 +37,11 @@ const nextConfig: NextConfig = {
       ".web.tsx",
       ...config.resolve.extensions,
     ];
+    config.plugins.push(
+      new webpack.DefinePlugin({
+        __DEV__: JSON.stringify(process.env.NODE_ENV !== "production"),
+      }),
+    );
     return config;
   },
   transpilePackages: [

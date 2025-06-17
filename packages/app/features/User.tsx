@@ -1,13 +1,23 @@
 "use client";
 
-import { Box, Heading, HStack, Text, VStack } from "@/ui/components";
+import {
+  Box,
+  Button,
+  ButtonText,
+  Heading,
+  HStack,
+  Link,
+  Text,
+  VStack,
+} from "@/ui/components";
 import { Loading } from "../components/Loading";
 import dayjs from "dayjs";
-import { useParams } from "solito/navigation";
+import { useLink, useParams } from "solito/navigation";
 import { useUserStats } from "../hooks/useUserStats";
 import { useUserProfile } from "../hooks/useUserProfile";
 import { NotFound } from "../components/NotFound";
 import { Badge, BadgeText } from "@/ui/components/Badge";
+import { useSession } from "../hooks/useSession";
 
 const roleToBadgeAction = {
   creator: "info",
@@ -17,6 +27,8 @@ const roleToBadgeAction = {
 
 export const UserScreen = () => {
   const { username } = useParams<{ username: string }>();
+
+  const { data: session } = useSession();
 
   const {
     data: profile,
@@ -60,6 +72,7 @@ export const UserScreen = () => {
 
             <Text className="text-sm text-gray-400">Joined: {date}</Text>
           </Box>
+          {session?.role === "creator" && <LinkChangeUser />}
         </HStack>
 
         <Box className="bg-gray-800 rounded-lg p-6 shadow space-y-2">
@@ -93,5 +106,20 @@ export const UserScreen = () => {
         </Box>
       </VStack>
     </VStack>
+  );
+};
+
+export const LinkChangeUser = () => {
+  const { username } = useParams<{ username: string }>();
+  const toChangeUserLink = useLink({
+    href: `/user/${username}/change`,
+  });
+
+  return (
+    <Link {...toChangeUserLink}>
+      <Button>
+        <ButtonText>Change User</ButtonText>
+      </Button>
+    </Link>
   );
 };

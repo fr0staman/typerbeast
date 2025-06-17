@@ -8,7 +8,7 @@ use crate::{
     db::{custom_types::UserRoles, schema::users},
 };
 
-#[derive(Queryable, Selectable, Insertable, Debug, Clone)]
+#[derive(Queryable, Selectable, Insertable, Debug, Clone, AsChangeset)]
 #[diesel(table_name = users)]
 pub struct User {
     pub id: Uuid,
@@ -57,5 +57,11 @@ impl User {
         let result = users.filter(username.eq(user_username)).first(conn).await.optional()?;
 
         Ok(result)
+    }
+
+    pub async fn update_user(self, conn: &mut DbConn) -> MyResult<User> {
+        use crate::db::schema::users::dsl::*;
+
+        Ok(diesel::update(users.filter(id.eq(self.id))).set(self).get_result(conn).await?)
     }
 }

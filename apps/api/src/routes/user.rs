@@ -364,3 +364,40 @@ pub async fn user_profile(
 
     Ok(Json(res))
 }
+
+#[derive(Deserialize, utoipa::ToSchema)]
+pub struct PatchUser {
+    role: UserRoles,
+}
+
+#[utoipa::path(
+    patch,
+    path = "/api/v1/user/{username}",
+    request_body = PatchUser,
+    responses(
+        (status = 200, description = "Success", body = UserProfileResponse),
+        (status = 401, description = "Unauthorized"),
+    )
+)]
+pub async fn patch_user(
+    _: Claims,
+    Path(username): Path<String>,
+    state: State<AppState>,
+    Json(input): Json<PatchUser>,
+) -> MyResult<Json<UserProfileResponse>> {
+    let mut conn = state.db().await?;
+
+    let maybe_user = User::get_user_by_username(&mut conn, &username).await?;
+    let Some(mut user) = maybe_user else { return Err(MyError::NotFound) };
+
+    user.role = input.role;
+    let user = user.update_user(&mut conn).await?;
+
+    let res = UserProfileResponse {
+        username: user.username,
+        created_at: user.created_at,
+        role: user.role,
+    };
+
+    Ok(Json(res))
+}

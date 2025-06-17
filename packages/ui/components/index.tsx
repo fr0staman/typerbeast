@@ -18,3 +18,38 @@ export { Pressable } from "./Pressable";
 export { HStack } from "./HStack";
 export { Link, LinkText } from "./Link";
 export { Badge } from "./Badge";
+export {
+  Select,
+  SelectTrigger,
+  SelectInput,
+  SelectIcon,
+  SelectPortal,
+  SelectBackdrop,
+  SelectContent,
+  SelectDragIndicator,
+  SelectDragIndicatorWrapper,
+  SelectItem,
+  SelectScrollView,
+  SelectVirtualizedList,
+  SelectFlatList,
+  SelectSectionList,
+  SelectSectionHeaderText,
+} from "./Select";
+
+export {
+  Actionsheet,
+  ActionsheetContent,
+  ActionsheetItem,
+  ActionsheetItemText,
+  ActionsheetDragIndicator,
+  ActionsheetDragIndicatorWrapper,
+  ActionsheetBackdrop,
+  ActionsheetScrollView,
+  ActionsheetVirtualizedList,
+  ActionsheetFlatList,
+  ActionsheetSectionList,
+  ActionsheetSectionHeaderText,
+  ActionsheetIcon,
+} from "./Actionsheet";
+
+export { Icon } from "./Icon";

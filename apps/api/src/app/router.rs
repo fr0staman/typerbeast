@@ -24,6 +24,7 @@ pub fn build_router(state: AppState) -> Router<()> {
         .routes(routes!(routes::user::user_stats))
         .routes(routes!(routes::user::user_profile))
         .routes(routes!(routes::leaderboard::get_leaderboard))
+        .routes(routes!(routes::user::patch_user))
         .split_for_parts();
 
     router
