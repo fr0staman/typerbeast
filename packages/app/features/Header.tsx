@@ -2,6 +2,7 @@
 
 import { HStack, Text, Link, LinkText } from "@/ui/components";
 import { useLink } from "solito/navigation";
+import { LangSwitch } from "../components/LangSwitch";
 
 export const Header = () => {
   const profileLinkProps = useLink({
@@ -51,6 +52,8 @@ export const Header = () => {
             <LinkText>Leaderboard</LinkText>
           </Link>
         </HStack>
+
+        <LangSwitch />
 
         <HStack space="lg" className="flex-1 justify-end items-center">
           {/* Right: Profile Icon */}
