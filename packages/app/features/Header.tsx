@@ -3,8 +3,10 @@
 import { HStack, Text, Link, LinkText } from "@/ui/components";
 import { useLink } from "solito/navigation";
 import { LangSwitch } from "../components/LangSwitch";
+import { useAppTranslation } from "../i18n/hooks";
 
 export const Header = () => {
+  const { t } = useAppTranslation("common");
   const profileLinkProps = useLink({
     href: "/profile",
   });
@@ -25,17 +27,6 @@ export const Header = () => {
     <HStack className="justify-center px-4 py-3 dark:bg-gray-800 items-center">
       <HStack space="xl" className="w-full md:max-w-7xl items-center">
         <HStack className="items-center" space="md">
-          {/*
-          <Image
-            size="xs"
-            // TODO: add logo
-            source={{ uri: "https://your-cdn.com/logo.png" }}
-            alt="Site Logo"
-            width={24}
-            height={24}
-            borderRadius={24}
-          />
-          */}
           <Link {...homeLinkProps}>
             <Text size="md" bold>
               TYPERBEAST
@@ -45,11 +36,11 @@ export const Header = () => {
 
         <HStack space="lg" className="flex-1 items-center">
           <Link {...dictionariesLinkProps}>
-            <LinkText>Dictionaries</LinkText>
+            <LinkText>{t("dictionaries")}</LinkText>
           </Link>
 
           <Link {...leaderboardLinkProps}>
-            <LinkText>Leaderboard</LinkText>
+            <LinkText>{t("leaderboard")}</LinkText>
           </Link>
         </HStack>
 
@@ -58,7 +49,7 @@ export const Header = () => {
         <HStack space="lg" className="flex-1 justify-end items-center">
           {/* Right: Profile Icon */}
           <Link {...profileLinkProps}>
-            <LinkText>Profile</LinkText>
+            <LinkText>{t("profile")}</LinkText>
           </Link>
         </HStack>
       </HStack>

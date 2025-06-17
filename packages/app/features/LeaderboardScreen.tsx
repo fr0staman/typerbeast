@@ -1,14 +1,6 @@
 "use client";
 
-import {
-  VStack,
-  Text,
-  HStack,
-  Pressable,
-  Box,
-  Link,
-  LinkText,
-} from "@/ui/components";
+import { VStack, Text, HStack, Pressable, Box, Link } from "@/ui/components";
 import { FlatList, ScrollView } from "react-native";
 import { Loading } from "../components/Loading";
 import { TopUser, useLeaderboard } from "../hooks/useLeaderboard";
@@ -16,11 +8,14 @@ import { useState } from "react";
 import { useDictionaries } from "../hooks/useDictionaries";
 import { useLink } from "solito/navigation";
 import dayjs from "dayjs";
+import { useAppTranslation } from "../i18n/hooks";
 
 const leagues = ["Web", "Mobile"] as const;
 const periods = ["Day", "Week", "Month", "AllTime"] as const;
 
 export const LeaderboardScreen = () => {
+  const { t } = useAppTranslation("common");
+
   const [selectedDict, setSelectedDict] = useState<string | undefined>();
   const [selectedLeague, setSelectedLeague] = useState<string | undefined>(
     "Web",
@@ -45,11 +40,11 @@ export const LeaderboardScreen = () => {
     <VStack className="px-4 py-10">
       <VStack className="w-full md:max-w-7xl mx-auto space-y-8">
         <Text className="text-xl font-bold mb-4 text-center">
-          🏆 Leaderboard
+          🏆 {t("leaderboard")}
         </Text>
         {/* Filters */}
         <Box className="mb-4">
-          <Text className="font-medium mb-1">📚 Dictionary</Text>
+          <Text className="font-medium mb-1">📚 {t("dictionary")}</Text>
           <ScrollView horizontal className="flex-row gap-2">
             <Box className="flex-row gap-2">
               {dictionaries?.list?.map(d => (
@@ -72,7 +67,7 @@ export const LeaderboardScreen = () => {
         </Box>
         <HStack className="justify-between">
           <Box className="mb-4">
-            <Text className="font-medium mb-1">📱 League</Text>
+            <Text className="font-medium mb-1">📱 {t("league")}</Text>
             <HStack className="flex-row gap-2">
               {leagues.map(l => (
                 <Pressable
@@ -92,7 +87,7 @@ export const LeaderboardScreen = () => {
             </HStack>
           </Box>
           <Box className="mb-4">
-            <Text className="font-medium mb-1">⏱️ Period</Text>
+            <Text className="font-medium mb-1">⏱️ {t("period")}</Text>
             <Box className="flex-row gap-2">
               {periods.map(p => (
                 <Pressable
@@ -111,7 +106,7 @@ export const LeaderboardScreen = () => {
           </Box>
         </HStack>
         {leaderboardLoading ? (
-          <Text className="text-center mt-4">Loading...</Text>
+          <Text className="text-center mt-4">{t("loading")}...</Text>
         ) : (
           <FlatList
             data={users?.users}
@@ -135,6 +130,7 @@ const LeaderboardPlayerItem = ({
   item: user,
   index,
 }: LeaderboardPlayerItem) => {
+  const { t } = useAppTranslation("common");
   const toUserLink = useLink({
     href: `/user/${user.username}`,
   });
@@ -152,28 +148,34 @@ const LeaderboardPlayerItem = ({
         </Text>
       </Link>
       <Text className="text-sm text-gray-500 dark:text-gray-400">
-        WPM: <Text className="text-white font-bold">{user.wpm.toFixed(2)}</Text>{" "}
-        | Mistakes: {user.mistakes}
+        {t("wpm")}:{" "}
+        <Text className="text-white font-bold">{user.wpm.toFixed(2)}</Text> |{" "}
+        {t("mistakes")}: {user.mistakes}
       </Text>
-      <Text className="text-xs mt-1 text-gray-400">Played at: {datetime}</Text>
+      <Text className="text-xs mt-1 text-gray-400">
+        {t("playedAt")}: {datetime}
+      </Text>
+      {/*
       <Link
         href={`/rooms/${user.room_id}?result=${user.id}`}
         className="mt-2 text-blue-500 underline"
       >
         <LinkText>View Race</LinkText>
       </Link>
+      */}
     </Box>
   );
 };
 
 export const LeaderboardEmpty = () => {
+  const { t } = useAppTranslation();
   return (
     <Box className="p-4 rounded-2xl border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-900 shadow">
       <Text className="text-sm text-gray-500 dark:text-gray-400">
-        No users found.
+        {t("noUsersFound")}
       </Text>
       <Text className="text-sm text-gray-500 dark:text-gray-400">
-        Maybe, you will be the first!
+        {t("maybeYouWillBeFirst")}
       </Text>
     </Box>
   );

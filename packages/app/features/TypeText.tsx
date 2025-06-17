@@ -138,7 +138,7 @@ export const TypingGame = () => {
         <VStack className="justify-center text-center text-sm text-gray-600 dark:text-gray-100 pt-6 border-t border-gray-700">
           <Text>{t("progressWith", { progress: progress.toFixed(1) })}</Text>
           <Text>{t("mistakesWith", { mistakes })}</Text>
-          <Text>{t("speedWith", { speed })}</Text>
+          <Text>{t("speedWith", { speed: speed?.toFixed(2) })}</Text>
         </VStack>
       </VStack>
     </VStack>

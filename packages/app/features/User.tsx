@@ -18,6 +18,7 @@ import { useUserProfile } from "../hooks/useUserProfile";
 import { NotFound } from "../components/NotFound";
 import { Badge, BadgeText } from "@/ui/components/Badge";
 import { useSession } from "../hooks/useSession";
+import { useAppTranslation } from "../i18n/hooks";
 
 const roleToBadgeAction = {
   creator: "info",
@@ -26,6 +27,8 @@ const roleToBadgeAction = {
 } as const;
 
 export const UserScreen = () => {
+  const { t } = useAppTranslation("common");
+
   const { username } = useParams<{ username: string }>();
 
   const { data: session } = useSession();
@@ -70,33 +73,35 @@ export const UserScreen = () => {
               </VStack>
             </HStack>
 
-            <Text className="text-sm text-gray-400">Joined: {date}</Text>
+            <Text className="text-sm text-gray-400">
+              {t("joined")}: {date}
+            </Text>
           </Box>
           {session?.role === "creator" && <LinkChangeUser />}
         </HStack>
 
         <Box className="bg-gray-800 rounded-lg p-6 shadow space-y-2">
           <Heading as="h2" className="text-xl font-semibold mb-2">
-            Typing Stats
+            {t("typingStats")}
           </Heading>
           <Text>
-            Total races:{" "}
+            {t("totalRaces")}:{" "}
             <Text className="font-semibold">{stats?.results_count}</Text>
           </Text>
           <Text>
-            Average wpm:{" "}
+            {t("averageWpm")}:{" "}
             <Text className="font-semibold">
               {stats?.average_wpm?.toFixed(2)}
             </Text>
           </Text>
           <Text>
-            Average cpm:{" "}
+            {t("averageCpm")}:{" "}
             <Text className="font-semibold">
               {stats?.average_cpm?.toFixed(2)}
             </Text>
           </Text>
           <Text>
-            Average mistakes:{" "}
+            {t("averageMistakes")}:{" "}
             <Text className="font-semibold">
               {stats?.average_mistakes?.toFixed(2)}
             </Text>
@@ -108,6 +113,7 @@ export const UserScreen = () => {
 };
 
 export const LinkChangeUser = () => {
+  const { t } = useAppTranslation("common");
   const { username } = useParams<{ username: string }>();
   const toChangeUserLink = useLink({
     href: `/user/${username}/change`,
@@ -116,7 +122,7 @@ export const LinkChangeUser = () => {
   return (
     <Link {...toChangeUserLink}>
       <Button>
-        <ButtonText>Change User</ButtonText>
+        <ButtonText>{t("changeUser")}</ButtonText>
       </Button>
     </Link>
   );

@@ -1,5 +1,11 @@
 {
   "createRoom": "Create room",
   "roomDetails": "Room {{room_id}} — {{players}}",
-  "roomDetailsStarted": "Room {{room_id}} — {{players}} (Started)"
+  "roomDetailsStarted": "Room {{room_id}} — {{players}} (Started)",
+  "availableRooms": "Available Rooms",
+  "room": "Room",
+  "statusStarted": "Started",
+  "statusWaiting": "Waiting",
+  "noRoomsFound": "No rooms found.",
+  "youCanCreateOne": "But you can create one!"
 }

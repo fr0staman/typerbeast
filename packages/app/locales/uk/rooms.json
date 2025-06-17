@@ -1,5 +1,11 @@
 {
   "createRoom": "Створити кімнату",
   "roomDetails": "Кімната {{room_id}} — {{players}}",
-  "roomDetailsStarted": "Room {{room_id}} — {{players}} (Почато)"
+  "roomDetailsStarted": "Кімната {{room_id}} — {{players}} (Почато)",
+  "availableRooms": "Доступні кімнати",
+  "room": "Кімната",
+  "statusStarted": "Почато",
+  "statusWaiting": "Очікування",
+  "noRoomsFound": "Кімнати не знайдені.",
+  "youCanCreateOne": "Але ви можете створити одну!"
 }

@@ -37,7 +37,7 @@ export const RoomsScreen = () => {
       <VStack className="w-full md:max-w-7xl mx-auto space-y-8">
         <HStack className="flex items-center justify-between">
           <Heading as="h1" className="text-2xl font-bold">
-            Available Rooms
+            {t("availableRooms")}
           </Heading>
           <Button onPress={createRoom}>
             <ButtonText>{t("createRoom")}</ButtonText>
@@ -59,7 +59,7 @@ type RoomItem = {
 };
 
 const RoomItem = ({ item }: RoomItem) => {
-  //const { t } = useAppTranslation("rooms");
+  const { t } = useAppTranslation(["rooms", "common"]);
   const toRoomLinkProps = useLink({
     href: `/rooms/${item.room_id}`,
   });
@@ -78,21 +78,21 @@ const RoomItem = ({ item }: RoomItem) => {
       <Box className="bg-gray-800 rounded-lg px-5 py-4 border border-gray-700 shadow-md flex items-center justify-between mb-4">
         <Box>
           <Text className="text-lg font-semibold">
-            Room{" "}
+            {t("room")}{" "}
             <Text className="text-blue-400">{item.room_id.slice(0, 8)}</Text>
           </Text>
           <Text className="text-sm text-gray-400">
-            Dictionary:{" "}
+            {t("dictionary")}:{" "}
             <Text className="text-gray-300">{item.dictionary.name}</Text>
           </Text>
         </Box>
         <Box>
           <Text>
-            Players:{" "}
+            {t("players")}:{" "}
             <Text className="font-medium text-gray-300">{item.players}</Text>
           </Text>
           <Text>
-            Status:{" "}
+            {t("status")}:{" "}
             <Text
               className={
                 item.started
@@ -100,7 +100,7 @@ const RoomItem = ({ item }: RoomItem) => {
                   : "text-green-400 font-semibold"
               }
             >
-              {item.started ? "Started" : "Waiting"}
+              {item.started ? t("statusStarted") : t("statusWaiting")}
             </Text>
           </Text>
         </Box>
@@ -110,13 +110,14 @@ const RoomItem = ({ item }: RoomItem) => {
 };
 
 const RoomsEmpty = () => {
+  const { t } = useAppTranslation("rooms");
   return (
     <Box className="p-4 rounded-2xl border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-900">
       <Text className="text-sm text-gray-500 dark:text-gray-400">
-        No rooms found.
+        {t("noRoomsFound")}
       </Text>
       <Text className="text-sm text-gray-500 dark:text-gray-400">
-        But you can create one!
+        {t("youCanCreateOne")}
       </Text>
     </Box>
   );

@@ -15,9 +15,10 @@ import {
   LinkText,
 } from "@/ui/components";
 import { FlatList } from "react-native";
+import { useAppTranslation } from "../i18n/hooks";
 
 export const DictionariesScreen = () => {
-  //const { t } = useAppTranslation("common");
+  const { t } = useAppTranslation("common");
 
   const { data: dictionaries, isLoading } = useDictionaries();
 
@@ -29,7 +30,7 @@ export const DictionariesScreen = () => {
     <VStack className="flex-1 space-y-4 items-center px-6 py-10">
       <VStack className="w-full md:max-w-7xl mx-auto space-y-8">
         <Heading as="h1" className="text-2xl font-bold">
-          Dictionaries
+          {t("dictionaries")}
         </Heading>
         <Box>
           <FlatList
@@ -47,6 +48,7 @@ type DictionaryItem = {
 };
 
 export const DictionaryItem = ({ item }: DictionaryItem) => {
+  const { t } = useAppTranslation("common");
   const toDictionaryLinks = useLink({
     href: `/dictionaries/${item.id}`,
   });
@@ -67,23 +69,29 @@ export const DictionaryItem = ({ item }: DictionaryItem) => {
           </Heading>
         </Link>
         <Button>
-          <ButtonText>Start Room</ButtonText>
+          <ButtonText>{t("startRoom")}</ButtonText>
         </Button>
       </HStack>
 
       <Box className="mt-3 text-sm text-gray-500 dark:text-gray-400  space-y-1">
         <HStack>
-          <Text className="text-gray-500 dark:text-gray-400">Author: </Text>
+          <Text className="text-gray-500 dark:text-gray-400">
+            {t("author")}:{" "}
+          </Text>
           <Link {...toUserLink}>
             <LinkText>{item.user.username}</LinkText>
           </Link>
         </HStack>
         <Text>
-          <Text className="text-gray-500 dark:text-gray-400">Created:</Text>{" "}
+          <Text className="text-gray-500 dark:text-gray-400">
+            {t("created")}:
+          </Text>{" "}
           {item.created_at}
         </Text>
         <Text>
-          <Text className="text-gray-500 dark:text-gray-400">Text count: </Text>
+          <Text className="text-gray-500 dark:text-gray-400">
+            {t("textCount")}:{" "}
+          </Text>
           {item.text_count}
         </Text>
       </Box>

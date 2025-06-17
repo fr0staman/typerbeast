@@ -17,6 +17,7 @@ import dayjs from "dayjs";
 import { useMeStats } from "../hooks/useMeStats";
 import { BadgeText } from "@/ui/components/Badge";
 import { useLink } from "solito/navigation";
+import { useAppTranslation } from "../i18n/hooks.web";
 
 const roleToBadgeAction = {
   creator: "info",
@@ -25,6 +26,7 @@ const roleToBadgeAction = {
 } as const;
 
 export const ProfileScreen = () => {
+  const { t } = useAppTranslation("common");
   const { data: profile, isLoading } = useSession();
   const { data: stats, isLoading: statsLoading } = useMeStats();
 
@@ -53,10 +55,10 @@ export const ProfileScreen = () => {
               </VStack>
             </HStack>
             <Text className="text-sm text-gray-500 dark:text-gray-400">
-              Joined: {date}
+              {t("joined")}: {date}
             </Text>
             <Text className="text-sm text-gray-500 dark:text-gray-400">
-              Email: {profile?.email}
+              {t("email")}: {profile?.email}
             </Text>
           </Box>
           <HStack className="space-x-3">
@@ -68,26 +70,26 @@ export const ProfileScreen = () => {
 
         <Box className="bg-white dark:bg-gray-800 rounded-lg p-6 shadow space-y-2">
           <Heading as="h2" className="text-xl font-semibold mb-2">
-            Typing Stats
+            {t("typingStats")}
           </Heading>
           <Text>
-            Total races:{" "}
+            {t("totalRaces")}:{" "}
             <Text className="font-semibold">{stats?.results_count}</Text>
           </Text>
           <Text>
-            Average wpm:{" "}
+            {t("averageWpm")}:{" "}
             <Text className="font-semibold">
               {stats?.average_wpm?.toFixed(2)}
             </Text>
           </Text>
           <Text>
-            Average cpm:{" "}
+            {t("averageCpm")}:{" "}
             <Text className="font-semibold">
               {stats?.average_cpm?.toFixed(2)}
             </Text>
           </Text>
           <Text>
-            Average mistakes:{" "}
+            {t("averageMistakes")}:{" "}
             <Text className="font-semibold">
               {stats?.average_mistakes?.toFixed(2)}
             </Text>
@@ -99,6 +101,7 @@ export const ProfileScreen = () => {
 };
 
 const LinkToModeratorPanel = () => {
+  const { t } = useAppTranslation("common");
   const moderatorPanelLinkProps = useLink({
     href: "/moderate",
   });
@@ -106,7 +109,7 @@ const LinkToModeratorPanel = () => {
   return (
     <Link {...moderatorPanelLinkProps}>
       <Button>
-        <ButtonText>Moderator panel</ButtonText>
+        <ButtonText>{t("moderatorPanel")}</ButtonText>
       </Button>
     </Link>
   );
