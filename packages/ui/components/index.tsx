@@ -17,3 +17,4 @@ export { Image } from "./Image";
 export { Pressable } from "./Pressable";
 export { HStack } from "./HStack";
 export { Link, LinkText } from "./Link";
+export { Badge } from "./Badge";

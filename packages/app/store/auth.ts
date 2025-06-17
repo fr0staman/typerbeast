@@ -2,10 +2,13 @@ import { create } from "zustand";
 import { createJSONStorage, persist } from "zustand/middleware";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
+type UserRoles = "creator" | "moderator" | "user";
+
 export type User = {
   username: string;
   email: string;
   created_at: string;
+  role: UserRoles;
 };
 
 interface AuthState {

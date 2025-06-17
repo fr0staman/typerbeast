@@ -7,6 +7,13 @@ import { useParams } from "solito/navigation";
 import { useUserStats } from "../hooks/useUserStats";
 import { useUserProfile } from "../hooks/useUserProfile";
 import { NotFound } from "../components/NotFound";
+import { Badge, BadgeText } from "@/ui/components/Badge";
+
+const roleToBadgeAction = {
+  creator: "info",
+  moderator: "success",
+  user: "muted",
+} as const;
 
 export const UserScreen = () => {
   const { username } = useParams<{ username: string }>();
@@ -37,9 +44,19 @@ export const UserScreen = () => {
       <VStack className="w-full md:max-w-7xl mx-auto space-y-6">
         <HStack className="flex items-center justify-between border-b border-gray-700 pb-4">
           <Box>
-            <Text size="3xl" className="font-bold">
-              {profile?.username}
-            </Text>
+            <HStack className="space-x-3">
+              <Text size="3xl" className="font-bold">
+                {profile?.username}{" "}
+              </Text>
+              <VStack className="justify-center">
+                <Badge
+                  size="md"
+                  action={roleToBadgeAction[profile?.role || "user"] || "muted"}
+                >
+                  <BadgeText>{profile?.role}</BadgeText>
+                </Badge>
+              </VStack>
+            </HStack>
 
             <Text className="text-sm text-gray-400">Joined: {date}</Text>
           </Box>
