@@ -7,6 +7,7 @@ import {
   ButtonText,
   Heading,
   HStack,
+  Link,
   Text,
   VStack,
 } from "@/ui/components";
@@ -15,6 +16,7 @@ import { useSession } from "../hooks/useSession";
 import dayjs from "dayjs";
 import { useMeStats } from "../hooks/useMeStats";
 import { BadgeText } from "@/ui/components/Badge";
+import { useLink } from "solito/navigation";
 
 const roleToBadgeAction = {
   creator: "info",
@@ -58,9 +60,9 @@ export const ProfileScreen = () => {
             </Text>
           </Box>
           <HStack className="space-x-3">
-            <Button>
-              <ButtonText>Manage dictionaries</ButtonText>
-            </Button>
+            {(profile?.role === "moderator" || profile?.role === "creator") && (
+              <LinkToModeratorPanel />
+            )}
           </HStack>
         </HStack>
 
@@ -93,5 +95,19 @@ export const ProfileScreen = () => {
         </Box>
       </VStack>
     </VStack>
+  );
+};
+
+const LinkToModeratorPanel = () => {
+  const moderatorPanelLinkProps = useLink({
+    href: "/moderate",
+  });
+
+  return (
+    <Link {...moderatorPanelLinkProps}>
+      <Button>
+        <ButtonText>Moderator panel</ButtonText>
+      </Button>
+    </Link>
   );
 };

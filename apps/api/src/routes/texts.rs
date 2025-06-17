@@ -2,6 +2,7 @@ use axum::{
     Json,
     extract::{Path, State},
 };
+use chrono::NaiveDateTime;
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;
 
@@ -133,7 +134,7 @@ pub async fn review_pending_text(
         return Err(MyError::Unauthorized);
     };
 
-    if user.role != UserRoles::Creator || user.role != UserRoles::Moderator {
+    if user.role != UserRoles::Creator && user.role != UserRoles::Moderator {
         return Err(MyError::Unauthorized);
     };
 
@@ -163,4 +164,68 @@ pub async fn review_pending_text(
     let text = pending_text.modify_pending_text(&mut conn).await?;
 
     Ok(Json(text))
+}
+
+#[derive(Serialize, utoipa::ToSchema)]
+pub struct UserInfo {
+    username: String,
+    created_at: NaiveDateTime,
+    role: UserRoles,
+}
+
+#[derive(Serialize, utoipa::ToSchema)]
+pub struct PendingTextInfo {
+    pub id: Uuid,
+    pub dictionary: Dictionary,
+    pub author: UserInfo,
+    pub title: String,
+    pub content: String,
+    pub created_at: NaiveDateTime,
+    pub reviewed_by: Option<Uuid>,
+    pub reviewed_at: Option<NaiveDateTime>,
+    pub status: ReviewTextStatus,
+    pub reason: Option<String>,
+}
+#[derive(Serialize, utoipa::ToSchema)]
+pub struct GetPendingTextsResponse {
+    list: Vec<PendingTextInfo>,
+}
+
+#[utoipa::path(
+    get,
+    path = "/api/v1/texts/pending",
+    responses(
+        (status = 200, description = "Success", body = GetPendingTextsResponse),
+        (status = 401, description = "Unauthorized"),
+    )
+)]
+pub async fn get_pending_texts(
+    _: Claims,
+    state: State<AppState>,
+) -> MyResult<Json<GetPendingTextsResponse>> {
+    let mut conn = state.db().await?;
+    let texts = PendingText::get_pending_not_reviewed_texts(&mut conn).await?;
+
+    let texts = texts
+        .into_iter()
+        .map(|(author, dictionary, pending_text)| PendingTextInfo {
+            id: pending_text.id,
+            dictionary,
+            author: UserInfo {
+                username: author.username,
+                created_at: author.created_at,
+                role: author.role,
+            },
+            title: pending_text.title,
+            content: pending_text.content,
+            created_at: pending_text.created_at,
+            reviewed_by: pending_text.reviewed_by,
+            reviewed_at: pending_text.reviewed_at,
+            status: pending_text.status,
+            reason: pending_text.reason,
+        })
+        .collect(); // TODO: Convert to texts.
+    let res = GetPendingTextsResponse { list: texts };
+
+    Ok(Json(res))
 }

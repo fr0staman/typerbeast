@@ -6,7 +6,11 @@ use uuid::Uuid;
 
 use crate::{
     app::types::{DbConn, MyResult},
-    db::{custom_types::ReviewTextStatus, schema::pending_texts},
+    db::{
+        custom_types::ReviewTextStatus,
+        models::{dictionary::Dictionary, user::User},
+        schema::pending_texts,
+    },
 };
 
 // TODO: split to more usable structs
@@ -48,6 +52,24 @@ impl PendingText {
         use crate::db::schema::pending_texts::dsl::*;
 
         let result = pending_texts.select(PendingText::as_select()).load(conn).await?;
+
+        Ok(result)
+    }
+
+    pub async fn get_pending_not_reviewed_texts(
+        conn: &mut DbConn,
+    ) -> MyResult<Vec<(User, Dictionary, PendingText)>> {
+        use crate::db::schema::dictionaries;
+        use crate::db::schema::pending_texts::dsl::*;
+        use crate::db::schema::users;
+
+        let result = pending_texts
+            .inner_join(users::table)
+            .inner_join(dictionaries::table)
+            .filter(status.eq(ReviewTextStatus::Pending))
+            .select((User::as_select(), Dictionary::as_select(), PendingText::as_select()))
+            .load(conn)
+            .await?;
 
         Ok(result)
     }

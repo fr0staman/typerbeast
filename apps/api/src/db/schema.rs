@@ -126,6 +126,7 @@ diesel::joinable!(rooms -> texts (text_id));
 diesel::joinable!(sessions -> users (user_id));
 diesel::joinable!(texts -> dictionaries (dictionary_id));
 diesel::joinable!(texts -> users (author_id));
+diesel::joinable!(pending_texts -> users (author_id));
 
 diesel::allow_tables_to_appear_in_same_query!(
     dictionaries,
