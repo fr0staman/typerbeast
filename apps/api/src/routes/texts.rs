@@ -59,13 +59,9 @@ pub async fn insert_text(
 ) -> MyResult<Json<PendingText>> {
     let mut conn = state.db().await?;
 
-    let dictionary = Dictionary::get_dictionary_by_id(&mut conn, input.dictionary_id)
+    let _ = Dictionary::get_dictionary_by_id(&mut conn, input.dictionary_id)
         .await?
         .ok_or(MyError::NotFound)?;
-
-    if dictionary.user_id != claims.sub {
-        return Err(MyError::Unauthorized);
-    }
 
     let user = User::get_user(&mut conn, claims.sub).await?.ok_or(MyError::Unauthorized)?;
 

@@ -15,6 +15,7 @@
     "@gluestack-ui/pressable": "^0.1.23",
     "@gluestack-ui/progress": "^0.1.18",
     "@gluestack-ui/select": "^0.1.31",
+    "@gluestack-ui/textarea": "^0.1.25",
     "@gluestack-ui/toast": "^1.0.9",
     "@legendapp/motion": "^2.4.0",
     "autoprefixer": "^10.4.21",

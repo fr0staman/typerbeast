@@ -6,7 +6,16 @@ import {
   useDictionary,
   Text as DictionaryTextType,
 } from "../hooks/useDictionary";
-import { Heading, HStack, Link, LinkText, Text, VStack } from "@/ui/components";
+import {
+  Button,
+  ButtonText,
+  Heading,
+  HStack,
+  Link,
+  LinkText,
+  Text,
+  VStack,
+} from "@/ui/components";
 import { FlatList } from "react-native";
 import dayjs from "dayjs";
 
@@ -19,6 +28,10 @@ export const DictionaryScreen = () => {
     href: `/user/${dictionary?.dictionary?.user?.username}`,
   });
 
+  const suggestTextLink = useLink({
+    href: `/dictionaries/${dict_id}/suggest`,
+  });
+
   if (isLoading) {
     return <Loading />;
   }
@@ -28,23 +41,30 @@ export const DictionaryScreen = () => {
   return (
     <VStack className="items-center px-6 py-10">
       <VStack className="w-full md:max-w-7xl mx-auto space-y-6">
-        <VStack>
-          <Heading
-            as="h1"
-            className="text-2xl font-bold text-gray-700 dark:text-blue-400"
-          >
-            {dictionary?.dictionary.name}
-          </Heading>
-          <Link {...toUserLink}>
+        <HStack className="justify-between">
+          <VStack>
+            <Heading
+              as="h1"
+              className="text-2xl font-bold text-gray-700 dark:text-blue-400"
+            >
+              {dictionary?.dictionary.name}
+            </Heading>
+            <Link {...toUserLink}>
+              <Text className="text-sm text-gray-700 dark:text-gray-400">
+                Author:{" "}
+                <LinkText>{dictionary?.dictionary?.user?.username}</LinkText>
+              </Text>
+            </Link>
             <Text className="text-sm text-gray-700 dark:text-gray-400">
-              Author:{" "}
-              <LinkText>{dictionary?.dictionary?.user?.username}</LinkText>
+              Created on: {date}
             </Text>
+          </VStack>
+          <Link {...suggestTextLink}>
+            <Button>
+              <ButtonText>Suggest text</ButtonText>
+            </Button>
           </Link>
-          <Text className="text-sm text-gray-700 dark:text-gray-400">
-            Created on: {date}
-          </Text>
-        </VStack>
+        </HStack>
         <FlatList
           data={dictionary?.list}
           renderItem={({ item, index }) => (

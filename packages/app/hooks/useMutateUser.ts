@@ -8,7 +8,7 @@ async function patchUser(username: string, user: Partial<User>) {
 
 export const useMutateUser = (username: string) => {
   return useMutation({
-    mutationFn: async (user: Partial<User>) => patchUser(username, user),
+    mutationFn: async (user: Partial<User>) => await patchUser(username, user),
     mutationKey: [`user-${username}`],
   });
 };

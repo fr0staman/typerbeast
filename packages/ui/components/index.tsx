@@ -53,3 +53,5 @@ export {
 } from "./Actionsheet";
 
 export { Icon } from "./Icon";
+
+export { Textarea, TextareaInput } from "./Textarea";

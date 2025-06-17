@@ -118,7 +118,7 @@ export const UserChange = () => {
           </Box>
         </HStack>
 
-        <Box className="bg-gray-800 rounded-lg p-6 shadow space-y-2">
+        <Box className="bg-white dark:bg-gray-800 rounded-lg p-6 shadow space-y-2">
           <Heading as="h2" className="text-xl font-semibold mb-2">
             Change
           </Heading>
